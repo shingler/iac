@@ -1,7 +1,7 @@
 composer.lock
 
 runtime/*
-
+vendor/*
 public/docs
 
 public/uploads

@@ -54,6 +54,8 @@ $di->admin = new Portal\Common\Admin();
 // $di->cache = function () {
 //     return new \PhalApi\Cache\MemcacheCache(\PhalApi\DI()->config->get('sys.mc'));
 // };
+// 缓存 - 本地文件缓存
+$di->cache = new PhalApi\Cache\FileCache(array('path' => API_ROOT . '/runtime', 'prefix' => 'doorlock'));
 
 // 支持JsonP的返回
 // if (!empty($_GET['callback'])) {
