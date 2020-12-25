@@ -89,7 +89,20 @@ class Member extends Api
 
         //新增成员
         $memberModel = new MemberModel($token);
-        $memberModel->add($nickname, $tel, $cardno);
+        $ret = $memberModel->add($nickname, $tel, $cardno);
+
+        //绑定成员
+        $ret = $memberModel->bind($tel, $devid, $start, $end);
+
+        //注册人脸
+        $ret = $memberModel->addFace($tel, $filedata, $devid);
+
+        //下发离线开锁权限
+        $ret = $memberModel->upgradeUnlock($tel, $devid);
+
+        //注册离线人脸库
+        $ret = $memberModel->upgradeFace($tel, $devid);
+
         return ["id"=>1, "content"=>$token];
     }
 
