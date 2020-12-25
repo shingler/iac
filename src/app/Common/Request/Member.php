@@ -1,5 +1,5 @@
 <?php
-namespace App\Common;
+namespace App\Common\Request;
 
 class Member
 {
@@ -8,7 +8,9 @@ class Member
         "add" => 100,
         "update" => 203,
         "status" => 201,
-        "delete" => 104
+        "delete" => 104,
+        "find" => 101,
+        "bind" => 200,
     ];
 
     public function __construct($token) {
@@ -39,13 +41,28 @@ class Member
     /**
      * 绑定成员
      * @param string $tel
-     * @param string $devid
+     * @param array $devid
+     * @param string $lockid
      * @param string $start
      * @param string $end
      * @return bool
      */
-    public function bind($tel, $devid, $start, $end) {
-        return true;
+    public function bind($tel, $devid, $lockid, $start, $end) {
+        $url = Urls::member();
+        $params = [
+            "typeid" => self::$_TYPE_ID["bind"],
+            "tel" => $tel,
+            "devid" => json_encode($devid),
+            "lockid" => $lockid,
+            "startdate" => date("Y-m-d", strtotime($start)),
+            "enddate" => date("Y-m-d", strtotime($end)),
+            "starttime" => date("H:i", strtotime($start)),
+            "endtime" => date("H:i", strtotime($end)),
+            "json" => true,
+            "token" => $this->token
+        ];
+        $ret = \App\curl_post($url, $params);
+        return $ret;
     }
 
     /**
@@ -79,5 +96,26 @@ class Member
      */
     public function upgradeFace($tel, $devid, $is_remove=false) {
         return true;
+    }
+
+    /**
+     * 查找指定成员
+     * @param string $tel
+     * @return array|bool
+     */
+    public function find($tel) {
+        $url = Urls::member();
+        $params = [
+            "typeid" => self::$_TYPE_ID["find"],
+            "tel" => $tel,
+            "token" => $this->token
+        ];
+        $ret = \App\curl_post($url, $params);
+        var_dump($ret["code"]);
+        if ($ret["code"] == 100101) {
+            return $ret["data"];
+        } else {
+            return false;
+        }
     }
 }

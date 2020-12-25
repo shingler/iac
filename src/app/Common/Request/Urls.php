@@ -1,5 +1,5 @@
 <?php
-namespace App\Common;
+namespace App\Common\Request;
 
 class Urls
 {
@@ -9,5 +9,9 @@ class Urls
 
     public static function token() {
         return "https://api.parkline.cc/api/token";
+    }
+
+    public static function device() {
+        return "https://api.parkline.cc/api/devicecgi";
     }
 }

@@ -9,6 +9,7 @@
 
 namespace tests\App\Api;
 use App\Api\Member;
+use App\Common\Request\Device;
 use PhalApi\Helper\TestRunner;
 
 require_once dirname(__FILE__) . '/../../bootstrap.php';
@@ -48,22 +49,22 @@ class PhpUnderControl_AppApiMember_Test extends \PHPUnit_Framework_TestCase
         fclose($fp);
 
         $params = array(
-            'tel' => "18611106295",
-            "nickname" => "老乐",
-            "cardno" => "[666666]",
+            'tel' => "18611106289",
+            "nickname" => "老乐29",
+            "cardno" => "[777777]",
             "devid" => "[215571]",
             "lockid" => "01",
-            "start" => "2020-12-23 16:30:00",
-            "end" => "2020-12-23 23:59:59",
+            "start" => "2020-12-25 16:30:00",
+            "end" => "2020-12-25 23:59:59",
             "filedata" => $filedata
         );
 
 
         // Step 2. 操作
         $rs = TestRunner::go($url, $params);
+        var_dump($rs);
 
         // Step 3. 检验
-        $this->assertEquals(1, $rs['id']);
         $this->assertArrayHasKey('content', $rs);
     }
 
@@ -72,7 +73,20 @@ class PhpUnderControl_AppApiMember_Test extends \PHPUnit_Framework_TestCase
      */ 
     public function testDelete()
     {
-        $rs = $this->appApiMember->Delete();
+        $cache = \PhalApi\DI()->cache;
+        $token = $cache->get("access_token");
+        if ($token == NULL) {
+            // 获取token并缓存
+            $doorLock = new Auth\DoorLock();
+            $token = $doorLock->getSignature();
+            $expires = strtotime($token["expires_in"]) - strtotime("now");
+            $cache->set("access_token", $token["access_token"], $expires);
+        }
+        $deviceModel = new Device($token);
+        $devid = "215571";
+        $lockid = "01";
+        $ret = $deviceModel->unlock($devid, $lockid);
+        var_dump($ret);
     }
 
     /**

@@ -1,6 +1,12 @@
 构建镜像
-docker build --name centos7_php54_httpd .
+docker build -t centos7_php54_httpd:0.1 .
 运行镜像
 docker run --name centos_php54_httpd -v ~/project:/var/www -p 8200:8200 --privileged=true -itd centos7_php54_httpd:0.1 /usr/sbin/init
 进入镜像
 docker exec -it centos_php54_httpd /bin/bash
+
+安装PHP依赖
+进入项目根目录
+composer install
+如果遇到：composer is not a command,可以运行下面的命令
+php composer.phar install

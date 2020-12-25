@@ -9,9 +9,10 @@ function hello() {
  * curl访问智能门禁的接口
  * @param string $apiurl
  * @param array $data
+ * @param string $format
  * @return bool|string
  */
-function curl_post($apiurl, $data) {
+function curl_post($apiurl, $data, $format="json") {
     header("Content-type: text/html; charset=utf-8");
     $acsurl = \PhalApi\DI()->config->get("elock.acsurl");
     $ch = curl_init();
@@ -27,11 +28,13 @@ function curl_post($apiurl, $data) {
     $logger->info("apiurl", $apiurl);
     $logger->info("acsurl", $acsurl);
     $logger->info("data", json_encode($data, JSON_UNESCAPED_UNICODE));
-    $data = curl_exec($ch);
-    $status_code = curl_errno($ch);
-    $logger->info("result", $status_code.":".$data);
-    if ($status_code != 200) {
-        throw new Exception(curl_error($ch), $status_code);
+    $result = curl_exec($ch);
+    if ($status_code = curl_errno($ch)) {
+        throw new \Exception(curl_error($ch), $status_code);
     }
-    return $data;
+    $logger->info("result", $result);
+    if ($format == "json") {
+        $result = json_decode($result, JSON_UNESCAPED_UNICODE);
+    }
+    return $result;
 }

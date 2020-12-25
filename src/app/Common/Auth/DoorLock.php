@@ -20,7 +20,7 @@ class DoorLock
     public function getSignature() {
         $url = "https://api.parkline.cc/api/token";
         $params = [
-            "appid" => $this->_appid,
+            "apiid" => $this->_appid,
             "apikey" => $this->_appkey
         ];
         $data = \App\curl_post($url, $params);

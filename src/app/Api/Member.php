@@ -3,7 +3,7 @@ namespace App\Api;
 use PhalApi\Api;
 use App\Common\Auth;
 use PhalApi\Exception\BadRequestException;
-use App\Common\Member as MemberModel;
+use App\Common\Request\Member as MemberModel;
 
 /**
  * 人员管理接口
@@ -71,7 +71,6 @@ class Member extends Api
         $filedata = $this->filedata;
 
         //json数据检查
-        $cardno = json_decode($cardno, true);
         if (!is_array($cardno)) {
             throw new BadRequestException("cardno请使用JSON数组字符串传递", 1);
         }
@@ -79,7 +78,6 @@ class Member extends Api
             throw new BadRequestException("cardno的数量不能超过10", 2);
         }
 
-        $devid = json_decode($devid, true);
         if (!is_array($devid)) {
             throw new BadRequestException("devid请使用JSON数组字符串传递", 3);
         }
@@ -87,12 +85,23 @@ class Member extends Api
             throw new BadRequestException("devid的数量不能超过20", 4);
         }
 
-        //新增成员
         $memberModel = new MemberModel($token);
-        $ret = $memberModel->add($nickname, $tel, $cardno);
+        //检查人员是否已存在
+        $ret = $memberModel->find($tel);
+        if ($ret) {
+            return ["data" => $ret, "content" => "用户已存在"];
+        }
 
+        //新增成员
+        $ret = $memberModel->add($nickname, $tel, $cardno);
+        //{"code":1,"msg":"成功"}
+        if ($ret["code"] != 1) {
+            return ["content" => "成员新增失败，".$ret["msg"]];
+        }
+        
         //绑定成员
-        $ret = $memberModel->bind($tel, $devid, $start, $end);
+        $ret = $memberModel->bind($tel, $devid, $lockid, $start, $end);
+        var_dump($ret);
 
         //注册人脸
         $ret = $memberModel->addFace($tel, $filedata, $devid);
