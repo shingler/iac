@@ -16,6 +16,7 @@ function curl_post($apiurl, $data, $format="json") {
     header("Content-type: text/html; charset=utf-8");
     $acsurl = \PhalApi\DI()->config->get("elock.acsurl");
     $ch = curl_init();
+
     $data = http_build_query($data);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0 );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -27,7 +28,7 @@ function curl_post($apiurl, $data, $format="json") {
     $logger = \PhalApi\DI()->logger;
     $logger->log("debug", "apiurl", $apiurl);
     $logger->debug("acsurl", $acsurl);
-    $logger->debug("data", json_encode($data, JSON_UNESCAPED_UNICODE));
+    $logger->debug("data", $data);
     $result = curl_exec($ch);
     if ($status_code = curl_errno($ch)) {
         throw new \Exception(curl_error($ch), $status_code);

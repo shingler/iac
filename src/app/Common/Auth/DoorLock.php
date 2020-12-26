@@ -18,9 +18,8 @@ class DoorLock
             "apiid" => $this->_apiid,
             "apikey" => $this->_apikey
         ];
-        $data = \App\curl_post($url, $params);
-        echo $data;
-        return json_decode($data, true);
+        $data = \App\curl_post($url, $params, "json");
+        return $data;
     }
     /**
      * 获取访问签名

@@ -11,6 +11,9 @@ class Member
         "delete" => 104,
         "find" => 101,
         "bind" => 200,
+        "face" => 300,
+        "unlock" => 400,
+        "face_offline" => 401
     ];
 
     public function __construct($token) {
@@ -22,6 +25,7 @@ class Member
      * @param string $nickname
      * @param string $tel
      * @param string $cardno
+     * @throws \Exception
      * @return bool
      */
     public function add($nickname, $tel, $cardno) {
@@ -45,6 +49,7 @@ class Member
      * @param string $lockid
      * @param string $start
      * @param string $end
+     * @throws \Exception
      * @return bool
      */
     public function bind($tel, $devid, $lockid, $start, $end) {
@@ -70,10 +75,20 @@ class Member
      * @param string $tel
      * @param string $filedata
      * @param string $devid
+     * @throws \Exception
      * @return bool
      */
     public function addFace($tel, $filedata, $devid) {
-        return true;
+        $url = Urls::member();
+        $params = [
+            "typeid" => self::$_TYPE_ID["face"],
+            "tel" => $tel,
+            "filedata" => $filedata,
+            "devid" => $devid,
+            "token" => $this->token
+        ];
+        $ret = \App\curl_post($url, $params);
+        return $ret;
     }
 
     /**
@@ -81,10 +96,20 @@ class Member
      * @param string $tel
      * @param string $devid
      * @param bool $is_new
+     * @throws \Exception
      * @return bool
      */
-    public function upgradeUnlock($tel, $devid, $is_new=false) {
-        return true;
+    public function upgradeUnlock($tel, $devid, $is_remove=false) {
+        $url = Urls::member();
+        $params = [
+            "typeid" => self::$_TYPE_ID["unlock"],
+            "tel" => $tel,
+            "devid" => json_encode($devid),
+            "flag" => $is_remove ? "02" : "01",
+            "token" => $this->token
+        ];
+        $ret = \App\curl_post($url, $params);
+        return $ret;
     }
 
     /**
@@ -95,12 +120,22 @@ class Member
      * @return bool
      */
     public function upgradeFace($tel, $devid, $is_remove=false) {
-        return true;
+        $url = Urls::member();
+        $params = [
+            "typeid" => self::$_TYPE_ID["face_offline"],
+            "tel" => $tel,
+            "devid" => json_encode($devid),
+            "flag" => $is_remove ? "02" : "01",
+            "token" => $this->token
+        ];
+        $ret = \App\curl_post($url, $params);
+        return $ret;
     }
 
     /**
      * 查找指定成员
      * @param string $tel
+     * @throws \Exception
      * @return array|bool
      */
     public function find($tel) {
@@ -111,7 +146,7 @@ class Member
             "token" => $this->token
         ];
         $ret = \App\curl_post($url, $params);
-        var_dump($ret["code"]);
+
         if ($ret["code"] == 100101) {
             return $ret["data"];
         } else {

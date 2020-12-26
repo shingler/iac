@@ -11,7 +11,8 @@ use App\Common\Request\Member as MemberModel;
  */
 class Member extends Api
 {
-    protected $cache;
+    protected $token;
+
     public function getRules() {
         return [
             "Add" => [
@@ -43,14 +44,8 @@ class Member extends Api
     }
 
     public function __construct() {
-        $this->cache = \PhalApi\DI()->cache;
-        if ($this->cache->get("access_token") == NULL) {
-            // 获取token并缓存
-            $doorLock = new Auth\DoorLock();
-            $token = $doorLock->getSignature();
-            $expires = strtotime($token["expires_in"]) - strtotime("now");
-            $this->cache->set("access_token", $token["access_token"], $expires);
-        }
+        // 获取token并缓存
+        $this->token = Auth\DoorLock::getSignature();
     }
 
     /**
@@ -60,7 +55,6 @@ class Member extends Api
      */
     public function Add()
     {
-        $token = $this->cache->get("access_token");
         $tel = $this->tel;
         $nickname = $this->nickname;
         $cardno = $this->cardno;
@@ -85,7 +79,7 @@ class Member extends Api
             throw new BadRequestException("devid的数量不能超过20", 4);
         }
 
-        $memberModel = new MemberModel($token);
+        $memberModel = new MemberModel($this->token);
         //检查人员是否已存在
         $ret = $memberModel->find($tel);
         if ($ret) {
@@ -112,7 +106,7 @@ class Member extends Api
         //注册离线人脸库
         $ret = $memberModel->upgradeFace($tel, $devid);
 
-        return ["id"=>1, "content"=>$token];
+        return ["id"=>1, "content"=>$this->token];
     }
 
     /**
