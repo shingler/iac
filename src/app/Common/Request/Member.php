@@ -11,6 +11,7 @@ class Member
         "delete" => 104,
         "find" => 101,
         "face" => 300,
+        "delete_face" => 301,
         "face_offline" => 401
     ];
 
@@ -54,6 +55,25 @@ class Member
             "typeid" => self::$_TYPE_ID["face"],
             "tel" => $tel,
             "filedata" => $filedata,
+            "devid" => $devid,
+            "token" => $this->token
+        ];
+        $ret = \App\curl_post($url, $params);
+        return $ret;
+    }
+
+    /**
+     * 删除人脸
+     * @param string $tel
+     * @param string $devid
+     * @throws \Exception
+     * @return bool
+     */
+    public function deleteFace($tel, $devid) {
+        $url = Urls::member();
+        $params = [
+            "typeid" => self::$_TYPE_ID["delete_face"],
+            "tel" => $tel,
             "devid" => $devid,
             "token" => $this->token
         ];

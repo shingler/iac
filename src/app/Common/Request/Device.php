@@ -9,6 +9,7 @@ class Device
         "bind" => 200,
         "find" => 201,
         "update_bind" => 203,
+        "delete_bind" => 204,
         "unlock_offline" => 400,
     ];
 
@@ -72,8 +73,24 @@ class Device
         return $ret;
     }
 
-    public function deleteBind() {
-
+    /**
+     * 删除绑定
+     * @param string $tel
+     * @param string $devid
+     * @throws \Exception
+     * @return bool|string
+     */
+    public function deleteBind($tel, $devid) {
+        $url = Urls::member();
+        $params = [
+            "typeid" => self::$_TYPE_ID["delete_bind"],
+            "tel" => $tel,
+            "devid" => json_encode($devid),
+            "json" => true,
+            "token" => $this->token
+        ];
+        $ret = \App\curl_post($url, $params);
+        return $ret;
     }
 
     /**
