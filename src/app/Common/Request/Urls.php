@@ -14,4 +14,8 @@ class Urls
     public static function device() {
         return "https://api.parkline.cc/api/devicecgi";
     }
+
+    public static function status() {
+        return "https://api.parkline.cc/api/statuscgi";
+    }
 }

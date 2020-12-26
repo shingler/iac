@@ -24,7 +24,6 @@ class PhpUnderControl_AppCommonRequestMember_Test extends \PHPUnit_Framework_Tes
         parent::setUp();
         //获取token
         $token = DoorLock::getSignature();
-        var_dump($token);
         $this->commonRequestMember = new \App\Common\Request\Member($token);
     }
 
