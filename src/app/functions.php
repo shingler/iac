@@ -25,14 +25,14 @@ function curl_post($apiurl, $data, $format="json") {
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     // 日志记录
     $logger = \PhalApi\DI()->logger;
-    $logger->info("apiurl", $apiurl);
-    $logger->info("acsurl", $acsurl);
-    $logger->info("data", json_encode($data, JSON_UNESCAPED_UNICODE));
+    $logger->log("debug", "apiurl", $apiurl);
+    $logger->debug("acsurl", $acsurl);
+    $logger->debug("data", json_encode($data, JSON_UNESCAPED_UNICODE));
     $result = curl_exec($ch);
     if ($status_code = curl_errno($ch)) {
         throw new \Exception(curl_error($ch), $status_code);
     }
-    $logger->info("result", $result);
+    $logger->debug("result", $result);
     if ($format == "json") {
         $result = json_decode($result, JSON_UNESCAPED_UNICODE);
     }
