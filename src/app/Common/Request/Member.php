@@ -10,9 +10,7 @@ class Member
         "status" => 201,
         "delete" => 104,
         "find" => 101,
-        "bind" => 200,
         "face" => 300,
-        "unlock" => 400,
         "face_offline" => 401
     ];
 
@@ -43,34 +41,6 @@ class Member
     }
 
     /**
-     * 绑定成员
-     * @param string $tel
-     * @param array $devid
-     * @param string $lockid
-     * @param string $start
-     * @param string $end
-     * @throws \Exception
-     * @return bool
-     */
-    public function bind($tel, $devid, $lockid, $start, $end) {
-        $url = Urls::member();
-        $params = [
-            "typeid" => self::$_TYPE_ID["bind"],
-            "tel" => $tel,
-            "devid" => json_encode($devid),
-            "lockid" => $lockid,
-            "startdate" => date("Y-m-d", strtotime($start)),
-            "enddate" => date("Y-m-d", strtotime($end)),
-            "starttime" => date("H:i", strtotime($start)),
-            "endtime" => date("H:i", strtotime($end)),
-            "json" => true,
-            "token" => $this->token
-        ];
-        $ret = \App\curl_post($url, $params);
-        return $ret;
-    }
-
-    /**
      * 注册人脸
      * @param string $tel
      * @param string $filedata
@@ -92,31 +62,11 @@ class Member
     }
 
     /**
-     * 下发/更新离线开锁权限
-     * @param string $tel
-     * @param string $devid
-     * @param bool $is_new
-     * @throws \Exception
-     * @return bool
-     */
-    public function upgradeUnlock($tel, $devid, $is_remove=false) {
-        $url = Urls::member();
-        $params = [
-            "typeid" => self::$_TYPE_ID["unlock"],
-            "tel" => $tel,
-            "devid" => json_encode($devid),
-            "flag" => $is_remove ? "02" : "01",
-            "token" => $this->token
-        ];
-        $ret = \App\curl_post($url, $params);
-        return $ret;
-    }
-
-    /**
      * 注册/删除离线人脸库
      * @param string $tel
      * @param string $devid
      * @param bool $is_remove
+     * @throws \Exception
      * @return bool
      */
     public function upgradeFace($tel, $devid, $is_remove=false) {
@@ -153,4 +103,5 @@ class Member
             return false;
         }
     }
+
 }

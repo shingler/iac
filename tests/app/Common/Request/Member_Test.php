@@ -8,6 +8,7 @@
  */
 
 namespace tests\App\Common\Request;
+use App\Common\Request\Device;
 use App\Common\Request\Member;
 use App\Common\Auth\DoorLock;
 use PhalApi\Helper\TestRunner;
@@ -17,6 +18,7 @@ require_once dirname(__FILE__) . '/../../../bootstrap.php';
 class PhpUnderControl_AppCommonRequestMember_Test extends \PHPUnit_Framework_TestCase
 {
     public $commonRequestMember;
+    public $commonRequestDevice;
     public static $rand3;
 
     protected function setUp()
@@ -25,6 +27,7 @@ class PhpUnderControl_AppCommonRequestMember_Test extends \PHPUnit_Framework_Tes
         //获取token
         $token = DoorLock::getSignature();
         $this->commonRequestMember = new \App\Common\Request\Member($token);
+        $this->commonRequestDevice = new Device($token);
     }
 
     public static function setUpBeforeClass() {
@@ -69,16 +72,56 @@ class PhpUnderControl_AppCommonRequestMember_Test extends \PHPUnit_Framework_Tes
      */ 
     public function testBind()
     {
+        echo "test bind".PHP_EOL;
         $rand3 = static::$rand3;
         $tel = sprintf("18611106%s", $rand3);
-        $devid = [215571];
+        $devid = 215571;
         $lockid = "01";
         $start = date("Y-m-d H:i:s");
         $end = date("Y-m-d 23:59:59");
-        $rs = $this->commonRequestMember->bind($tel, $devid, $lockid, $start, $end);
+        $rs = $this->commonRequestDevice->bind($tel, $devid, $lockid, $start, $end);
 
         $this->assertArrayHasKey('code', $rs);
-        $this->assertEquals('code', 1);
+        $this->assertEquals($rs['code'], 1);
+
+        if ($rs["code"] != 1) {
+            var_dump($rs);
+        }
+    }
+
+    /**
+     * @depends testBind
+     */
+    public function testFindBind() {
+        echo "test find bind".PHP_EOL;
+        $rand3 = static::$rand3;
+        $tel = sprintf("18611106%s", $rand3);
+        $devid = 215571;
+        $rs = $this->commonRequestDevice->find($tel, $devid);
+        $this->assertArrayHasKey("code", $rs);
+        $this->assertEquals($rs['code'], 100101);
+        //{"data":{"endtime":"23:59","starttime":"00:00","startdate":"2020-12-26","devid":"215571","enddate":"2030-12-26","week":["0","1","2","3","4","5","6"]},"code":100101}
+
+        if ($rs["code"] != 100101) {
+            var_dump($rs);
+        }
+    }
+
+    /**
+     * @depends testBind
+     */
+    public function testUpdateBind() {
+        echo "test update bind".PHP_EOL;
+        $rand3 = static::$rand3;
+        $tel = sprintf("18611106%s", $rand3);
+        $devid = 215571;
+        $lockid = "01";
+        $start = date("Y-m-d H:i:s");
+        $end = date("Y-m-d 23:59:59", strtotime("+1day"));
+        $rs = $this->commonRequestDevice->updateBind($tel, $devid, $lockid, $start, $end);
+        //{"code":1,"msg":"成功"}
+        $this->assertArrayHasKey('code', $rs);
+        $this->assertEquals($rs['code'], 1);
 
         if ($rs["code"] != 1) {
             var_dump($rs);
@@ -90,6 +133,7 @@ class PhpUnderControl_AppCommonRequestMember_Test extends \PHPUnit_Framework_Tes
      */ 
     public function testAddFace()
     {
+        echo "test add face".PHP_EOL;
         $rand3 = static::$rand3;
         $tel = sprintf("18611106%s", $rand3);
         $devid = 215571;
@@ -114,10 +158,11 @@ class PhpUnderControl_AppCommonRequestMember_Test extends \PHPUnit_Framework_Tes
      */ 
     public function testUpgradeUnlock()
     {
+        echo "test upgrade unlock".PHP_EOL;
         $rand3 = static::$rand3;
         $tel = sprintf("18611106%s", $rand3);
-        $devid = [215571];
-        $rs = $this->commonRequestMember->upgradeUnlock($tel, $devid, false);
+        $devid = 215571;
+        $rs = $this->commonRequestDevice->upgradeUnlock($tel, $devid, false);
         $this->assertArrayHasKey("code", $rs);
         $this->assertEquals($rs["code"], 1);
         if ($rs["code"] != 1) {
@@ -129,9 +174,10 @@ class PhpUnderControl_AppCommonRequestMember_Test extends \PHPUnit_Framework_Tes
      * @depends testAdd
      */
     public function testUpgradeFace() {
+        echo "test upgrade face".PHP_EOL;
         $rand3 = static::$rand3;
         $tel = sprintf("18611106%s", $rand3);
-        $devid = [215571];
+        $devid = 215571;
         $rs = $this->commonRequestMember->upgradeFace($tel, $devid, false);
         $this->assertArrayHasKey("code", $rs);
         $this->assertEquals($rs["code"], 1);
@@ -140,7 +186,11 @@ class PhpUnderControl_AppCommonRequestMember_Test extends \PHPUnit_Framework_Tes
         }
     }
 
+    /**
+     * @depends testAdd
+     */
     public function testFind() {
+        echo "test find a member".PHP_EOL;
         $rand3 = static::$rand3;
         $tel = sprintf("18611106%s", $rand3);
         $devid = [215571];

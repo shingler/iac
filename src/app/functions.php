@@ -10,6 +10,7 @@ function hello() {
  * @param string $apiurl
  * @param array $data
  * @param string $format
+ * @throws \Exception
  * @return bool|string
  */
 function curl_post($apiurl, $data, $format="json") {

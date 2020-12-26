@@ -5,11 +5,119 @@ class Device
 {
     private $token;
     protected static $_TYPE_ID = [
-        "unlock" => "01"
+        "unlock" => "01",
+        "bind" => 200,
+        "find" => 201,
+        "update_bind" => 203,
+        "unlock_offline" => 400,
     ];
 
     public function __construct($token) {
         $this->token = $token;
+    }
+
+    /**
+     * 绑定成员
+     * @param string $tel
+     * @param array $devid
+     * @param string $lockid
+     * @param string $start
+     * @param string $end
+     * @throws \Exception
+     * @return bool
+     */
+    public function bind($tel, $devid, $lockid, $start, $end) {
+        $url = Urls::member();
+        $params = [
+            "typeid" => self::$_TYPE_ID["bind"],
+            "tel" => $tel,
+            "devid" => json_encode($devid),
+            "lockid" => $lockid,
+            "startdate" => date("Y-m-d", strtotime($start)),
+            "enddate" => date("Y-m-d", strtotime($end)),
+            "starttime" => date("H:i", strtotime($start)),
+            "endtime" => date("H:i", strtotime($end)),
+            "json" => true,
+            "token" => $this->token
+        ];
+        $ret = \App\curl_post($url, $params);
+        return $ret;
+    }
+
+    /**
+     * 修改绑定
+     * @param string $tel
+     * @param array $devid
+     * @param string $lockid
+     * @param string $start
+     * @param string $end
+     * @throws \Exception
+     * @return bool
+     */
+    public function updateBind($tel, $devid, $lockid, $start, $end) {
+        $url = Urls::member();
+        $params = [
+            "typeid" => self::$_TYPE_ID["update_bind"],
+            "tel" => $tel,
+            "devid" => json_encode($devid),
+            "lockid" => $lockid,
+            "startdate" => date("Y-m-d", strtotime($start)),
+            "enddate" => date("Y-m-d", strtotime($end)),
+            "starttime" => date("H:i", strtotime($start)),
+            "endtime" => date("H:i", strtotime($end)),
+            "json" => true,
+            "token" => $this->token
+        ];
+        $ret = \App\curl_post($url, $params);
+        return $ret;
+    }
+
+    public function deleteBind() {
+
+    }
+
+    /**
+     * 下发/更新离线开锁权限
+     * @param string $tel
+     * @param string $devid
+     * @param bool $is_remove
+     * @throws \Exception
+     * @return bool
+     */
+    public function upgradeUnlock($tel, $devid, $is_remove=false) {
+        $url = Urls::member();
+        $params = [
+            "typeid" => self::$_TYPE_ID["unlock_offline"],
+            "tel" => $tel,
+            "devid" => json_encode($devid),
+            "flag" => $is_remove ? "02" : "01",
+            "token" => $this->token
+        ];
+        $ret = \App\curl_post($url, $params);
+        return $ret;
+    }
+
+    /**
+     * 查找指定绑定
+     * @param string $tel
+     * @throws \Exception
+     * @return array|bool
+     */
+    public function find($tel, $devid) {
+        $url = Urls::member();
+        $params = [
+            "typeid" => self::$_TYPE_ID["find"],
+            "tel" => $tel,
+            "devid" => $devid,
+            "token" => $this->token
+        ];
+        $ret = \App\curl_post($url, $params);
+
+        if ($ret["code"] == 100101) {
+            return $ret["data"];
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -34,6 +142,8 @@ class Device
     /**
      * 查看设备状态
      * @param $devid
+     * @throws \Exception
+     * @return bool|string
      */
     public function status($devid, $lockid) {
         $url = Urls::status();

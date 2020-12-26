@@ -32,7 +32,6 @@ class PhpUnderControl_AppCommonRequestDevice_Test extends \PHPUnit_Framework_Tes
         // var_dump(\PhalApi\DI()->tracer->getStack());
     }
 
-
     /**
      * @group testGetRules
      */
@@ -65,4 +64,5 @@ class PhpUnderControl_AppCommonRequestDevice_Test extends \PHPUnit_Framework_Tes
 
         var_dump($rs);
     }
+
 }
