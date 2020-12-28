@@ -1,9 +1,11 @@
 <?php
 namespace App\Api;
+use App\Common\AppException;
 use PhalApi\Api;
 use App\Common\Auth;
 use PhalApi\Exception\BadRequestException;
 use App\Common\Request\Member as MemberModel;
+use App\Common\Request\Device as DeviceModel;
 
 /**
  * 人员管理接口
@@ -65,25 +67,27 @@ class Member extends Api
         $filedata = $this->filedata;
 
         //json数据检查
-        if (!is_array($cardno)) {
-            throw new BadRequestException("cardno请使用JSON数组字符串传递", 1);
-        }
-        if (count($cardno) > 10) {
-            throw new BadRequestException("cardno的数量不能超过10", 2);
-        }
+//        if (!is_array($cardno)) {
+//            throw new BadRequestException("cardno请使用JSON数组字符串传递", 1);
+//        }
+//        if (count($cardno) > 10) {
+//            throw new BadRequestException("cardno的数量不能超过10", 2);
+//        }
 
-        if (!is_array($devid)) {
-            throw new BadRequestException("devid请使用JSON数组字符串传递", 3);
-        }
-        if (count($devid) > 20) {
-            throw new BadRequestException("devid的数量不能超过20", 4);
-        }
+//        if (!is_array($devid)) {
+//            throw new BadRequestException("devid请使用JSON数组字符串传递", 3);
+//        }
+//        if (count($devid) > 20) {
+//            throw new BadRequestException("devid的数量不能超过20", 4);
+//        }
+//        var_dump(strlen($filedata));
 
         $memberModel = new MemberModel($this->token);
+        $deviceModel = new DeviceModel($this->token);
         //检查人员是否已存在
         $ret = $memberModel->find($tel);
         if ($ret) {
-            return ["data" => $ret, "content" => "用户已存在"];
+            return new AppException("用户已存在", 1001);
         }
 
         //新增成员
@@ -94,19 +98,36 @@ class Member extends Api
         }
         
         //绑定成员
-        $ret = $memberModel->bind($tel, $devid, $lockid, $start, $end);
-        var_dump($ret);
+        $ret = $deviceModel->bind($tel, $devid, $lockid, $start, $end);
+        if ($ret["code"] != 1) {
+            return ["content" => sprintf("绑定成员失败，%s", $ret["msg"])];
+        }
 
         //注册人脸
         $ret = $memberModel->addFace($tel, $filedata, $devid);
+        if ($ret["code"] != 1) {
+            return ["content" => sprintf("注册人脸失败，%s", $ret["msg"])];
+        }
 
         //下发离线开锁权限
-        $ret = $memberModel->upgradeUnlock($tel, $devid);
+        $ret = $deviceModel->upgradeUnlock($tel, $devid, false);
+        if ($ret["code"] != "0") {
+            return ["content" => sprintf("下发离线开锁权限失败，%s", $ret["msg"])];
+        }
 
         //注册离线人脸库
-        $ret = $memberModel->upgradeFace($tel, $devid);
+        $ret = $memberModel->upgradeFace($tel, $devid, false);
+        if ($ret["code"] != "0") {
+            return ["content" => sprintf("注册离线人脸库失败，%s", $ret["msg"])];
+        }
 
-        return ["id"=>1, "content"=>$this->token];
+        //查找信息以检查
+        $ret = $memberModel->find($tel);
+        if ($ret) {
+            return ["content"=>"注册完成，数据同步有延迟，请稍候"];
+        }
+
+        return ["content"=>"成员新增成功", "data"=>$ret];
     }
 
     /**

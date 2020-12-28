@@ -10,6 +10,7 @@
 namespace tests\App\Api;
 use App\Api\Member;
 use App\Common\Request\Device;
+use App\Common\AppException;
 use PhalApi\Helper\TestRunner;
 
 require_once dirname(__FILE__) . '/../../bootstrap.php';
@@ -33,46 +34,80 @@ class PhpUnderControl_AppApiMember_Test extends \PHPUnit_Framework_TestCase
         // var_dump(\PhalApi\DI()->tracer->getStack());
     }
 
+    public function appProvider() {
+        $rand4 = mt_rand(1000, 9999);
+        return [
+            ["1861110".$rand4, 215571]
+        ];
+    }
+
 
     /**
-     * @group testGetRules
+     * @dataProvider appProvider
+     * @expectedException \App\Common\AppException
+     * @expectedExceptionCode 1001
      */ 
-    public function testAdd()
+    public function testAdd($tel, $devid)
     {
 //        $rs = $this->appApiMember->getRules();
         // Step 1. 构造
         $url = 's=Member.Add';
-        $filedata = "";
         $filename = dirname(__FILE__).'/../../WechatIMG189.jpeg';
-        $fp = fopen($filename, "rb");
-        $filedata = base64_encode(fread($fp, filesize($filename)));
-        fclose($fp);
+        $filedata = base64_encode(file_get_contents($filename));
+        $start = date("Y-m-d H:i:s");
+        $end = date("Y-m-d 23:59:59");
 
+        // 应该报已存在
         $params = array(
-            'tel' => "18611106289",
-            "nickname" => "老乐29",
+            'tel' => "18611106295",
+            "nickname" => "老乐",
             "cardno" => "[777777]",
-            "devid" => "[215571]",
+            "devid" => json_encode([$devid]),
             "lockid" => "01",
-            "start" => "2020-12-25 16:30:00",
-            "end" => "2020-12-25 23:59:59",
+            "start" => $start,
+            "end" => $end,
             "filedata" => $filedata
         );
+//        $rs_fail = TestRunner::go($url, $params);
 
-
-        // Step 2. 操作
+        // 随机手机号，应该成功
+        $params = array(
+            'tel' => $tel,
+            "nickname" => "老乐".substr($tel, -4),
+            "cardno" => substr($tel, -6),
+            "devid" => $devid,
+            "lockid" => "01",
+            "start" => $start,
+            "end" => $end,
+            "filedata" => $filedata
+        );
         $rs = TestRunner::go($url, $params);
-        var_dump($rs);
 
-        // Step 3. 检验
-        $this->assertArrayHasKey('content', $rs);
+        $this->markTestIncomplete("该测试用例尚未完成");
     }
 
     /**
-     * @group testDelete
+     * @group testUpdate
      */ 
+    public function testUpdate()
+    {
+
+    }
+
+    /**
+     * @group testStatus
+     */ 
+    public function testStatus()
+    {
+
+    }
+
+    /**
+     *
+     */
     public function testDelete()
     {
+        $this->markTestSkipped("暂不测试删除");
         $cache = \PhalApi\DI()->cache;
         $token = $cache->get("access_token");
         if ($token == NULL) {
@@ -87,22 +122,6 @@ class PhpUnderControl_AppApiMember_Test extends \PHPUnit_Framework_TestCase
         $lockid = "01";
         $ret = $deviceModel->unlock($devid, $lockid);
         var_dump($ret);
-    }
-
-    /**
-     * @group testUpdate
-     */ 
-    public function testUpdate()
-    {
-        $rs = $this->appApiMember->Update();
-    }
-
-    /**
-     * @group testStatus
-     */ 
-    public function testStatus()
-    {
-        $rs = $this->appApiMember->Status();
     }
 
 }
