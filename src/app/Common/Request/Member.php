@@ -26,6 +26,7 @@ class Member
      * @param string $cardno
      * @throws \Exception
      * @return bool
+     * {"code":1,"msg":"成功"}
      */
     public function add($nickname, $tel, $cardno) {
         $url = Urls::member();
@@ -48,6 +49,7 @@ class Member
      * @param string $devid
      * @throws \Exception
      * @return bool
+     * {"code":1,"msg":"注册成功"}
      */
     public function addFace($tel, $filedata, $devid) {
         $url = Urls::member();
@@ -88,6 +90,7 @@ class Member
      * @param bool $is_remove
      * @throws \Exception
      * @return bool
+     * {"devid":"215571","code":"0","msg":"success"}
      */
     public function upgradeFace($tel, $devid, $is_remove=false) {
         $url = Urls::member();
@@ -107,6 +110,7 @@ class Member
      * @param string $tel
      * @throws \Exception
      * @return array|bool
+     * {"data":{"tel":"18611106639","name":"老乐639","cishu":"999999","cardno":"777777"},"code":100101}
      */
     public function find($tel) {
         $url = Urls::member();

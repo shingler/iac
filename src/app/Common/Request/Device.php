@@ -26,6 +26,7 @@ class Device
      * @param string $end
      * @throws \Exception
      * @return bool
+     * {"code":1,"msg":"成功"}
      */
     public function bind($tel, $devid, $lockid, $start, $end) {
         $url = Urls::member();
@@ -54,6 +55,7 @@ class Device
      * @param string $end
      * @throws \Exception
      * @return bool
+     * {"code":1,"msg":"成功"}
      */
     public function updateBind($tel, $devid, $lockid, $start, $end) {
         $url = Urls::member();
@@ -100,6 +102,7 @@ class Device
      * @param bool $is_remove
      * @throws \Exception
      * @return bool
+     * {"devid":"215571","code":"0","msg":"success"}
      */
     public function upgradeUnlock($tel, $devid, $is_remove=false) {
         $url = Urls::member();
@@ -119,6 +122,7 @@ class Device
      * @param string $tel
      * @throws \Exception
      * @return array|bool
+     * {"data":{"endtime":"23:59","starttime":"00:00","startdate":"2020-12-26","devid":"215571","enddate":"2030-12-26","week":["0","1","2","3","4","5","6"]},"code":100101}
      */
     public function find($tel, $devid) {
         $url = Urls::member();
