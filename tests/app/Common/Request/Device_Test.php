@@ -36,9 +36,11 @@ class PhpUnderControl_AppCommonRequestDevice_Test extends \PHPUnit_Framework_Tes
      * @group testGetRules
      */
     public function testUnlock() {
+        echo sprintf("test unlock%s", PHP_EOL);
         $devid = 215571;
         $lockid = "01";
         $rs = $this->commonRequestDevice->unlock($devid, $lockid);
+        //{"devid":"215571","code":"0","msg":"success"}
 
         // Step 3. 检验
         $this->assertArrayHasKey('code', $rs);
@@ -52,15 +54,17 @@ class PhpUnderControl_AppCommonRequestDevice_Test extends \PHPUnit_Framework_Tes
      * @group testGetRules
      */
     public function testStatus() {
+        echo sprintf("test status%s", PHP_EOL);
         $devid = 215571;
         $lockid = "01";
 
         // Step 2. 操作
         $rs = $this->commonRequestDevice->status($devid, $lockid);
+        //{"devid":"215571","status":"在线","lastopenlocktime":"未知","lastduandiantime":"未知","lastcloselocktime":"未知","lockstatus":"未知","doorstatus":"未知","qudianstatus":"未知","lastopendoortime":"未知","lastclosedoortime":"未知","lastqudiantime":"未知"}
 
         // Step 3. 检验
         $this->assertNotEmpty($rs);
-        $this->assertInstanceOf("Array", $rs);
+        $this->assertInternalType("array", $rs);
 
         var_dump($rs);
     }
