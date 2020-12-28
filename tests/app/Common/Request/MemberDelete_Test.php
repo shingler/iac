@@ -36,7 +36,7 @@ class PhpUnderControl_AppCommonRequestMemberDelete_Test extends \PHPUnit_Framewo
      */
     public function additionProvider() {
         return [
-            ["18611106696", 215571]
+            ["18611106482", 215571]
         ];
     }
 
@@ -133,6 +133,22 @@ class PhpUnderControl_AppCommonRequestMemberDelete_Test extends \PHPUnit_Framewo
     public function testDeleteBind($tel, $devid) {
         echo "test delete bind".PHP_EOL;
         $rs = $this->commonRequestDevice->deleteBind($tel, $devid);
+        //{"code":1,"msg":"成功"}
+        $this->assertArrayHasKey('code', $rs);
+        $this->assertEquals($rs['code'], 1);
+
+        if ($rs["code"] != 1) {
+            var_dump($rs);
+        }
+    }
+
+    /**
+     * @depends testFind
+     * @dataProvider additionProvider
+     */
+    public function testDelete($tel) {
+        echo "test delete".PHP_EOL;
+        $rs = $this->commonRequestMember->delete($tel);
         //{"code":1,"msg":"成功"}
         $this->assertArrayHasKey('code', $rs);
         $this->assertEquals($rs['code'], 1);

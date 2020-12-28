@@ -112,6 +112,7 @@ class Member
      * @throws \Exception
      * @return array|bool
      * {"data":{"tel":"18611106639","name":"老乐639","cishu":"999999","cardno":"777777"},"code":100101}
+     * {"code":100100,"msg":"成员信息不存在"}
      */
     public function find($tel) {
         $url = Urls::member();
@@ -127,6 +128,24 @@ class Member
         } else {
             return false;
         }
+    }
+
+    /**
+     * 删除指定成员
+     * @param $tel
+     * @throws \Exception
+     * @return bool|array
+     * {"code":1,"msg":"成功"}
+     */
+    public function delete($tel) {
+        $url = Urls::member();
+        $params = [
+            "typeid" => self::$_TYPE_ID["delete"],
+            "tel" => $tel,
+            "token" => $this->token
+        ];
+        $ret = \App\curl_post($url, $params);
+        return $ret;
     }
 
 }
