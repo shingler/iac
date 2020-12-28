@@ -36,7 +36,7 @@ class PhpUnderControl_AppCommonRequestMemberDelete_Test extends \PHPUnit_Framewo
      */
     public function additionProvider() {
         return [
-            ["18611106381", 215571]
+            ["18611106696", 215571]
         ];
     }
 
@@ -80,10 +80,12 @@ class PhpUnderControl_AppCommonRequestMemberDelete_Test extends \PHPUnit_Framewo
         echo "test delete face offline".PHP_EOL;
         $rs = $this->commonRequestMember->upgradeFace($tel, $devid, true);
         //{"devid":"215571","code":"300103","msg":"device offline"}
-        $this->assertArrayHasKey('code', $rs);
-        $this->assertEquals($rs['code'], 1);
+        //{"devid":"215571","code":"0","msg":"success"}
 
-        if ($rs["code"] != 1) {
+        $this->assertArrayHasKey('code', $rs);
+        $this->assertEquals($rs['code'], "0");
+
+        if ($rs["code"] != "0") {
             var_dump($rs);
         }
     }
@@ -96,11 +98,12 @@ class PhpUnderControl_AppCommonRequestMemberDelete_Test extends \PHPUnit_Framewo
     public function testDeleteUnlock($tel, $devid) {
         echo "test delete unlock".PHP_EOL;
         $rs = $this->commonRequestDevice->upgradeUnlock($tel, $devid, true);
+        //{"devid":"215571","code":"0","msg":"success"}
 
         $this->assertArrayHasKey('code', $rs);
-        $this->assertEquals($rs['code'], 1);
+        $this->assertEquals($rs['code'], "0");
 
-        if ($rs["code"] != 1) {
+        if ($rs["code"] != "0") {
             var_dump($rs);
         }
     }

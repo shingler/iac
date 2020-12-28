@@ -70,6 +70,7 @@ class Member
      * @param string $devid
      * @throws \Exception
      * @return bool
+     * {"code":1,"msg":"删除成功"}
      */
     public function deleteFace($tel, $devid) {
         $url = Urls::member();
