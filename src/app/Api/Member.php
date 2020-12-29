@@ -22,7 +22,7 @@ class Member extends Api
                 "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true, "min" => 1],
                 "nickname" => ["name" => "nickname", "desc" => "成员昵称", "type" => "string", "require" => true, "min" => 1],
                 "cardno" => ["name" => "cardno", "desc" => "卡号（6位卡号，请使用JSON数组字符串传递，单次不超过10个卡号）", "type" => "array", "format" => "json", "require" => true],
-                "devid" => ["name" => "devid", "desc" => "设备编号", "type" => "array", "format" => "json", "require" => true],
+                "devid" => ["name" => "devid", "desc" => "设备编号", "type" => "string", "require" => true],
                 "lockid" => ["name" => "lockid", "desc" => "锁编号（01-10），支持逗号连接，注意请用英文半角", "type" => "string", "require" => true],
                 "start" => ["name" => "start", "desc" => "开始日期时间，格式：2020-12-21 13:30:00", "type" => "date", "require" => true, "min" => 1],
                 "end" => ["name" => "end", "desc" => "到期日期时间，格式：2020-12-21 13:30:00", "type" => "date", "require" => true, "min" => 1],

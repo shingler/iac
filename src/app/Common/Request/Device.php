@@ -33,7 +33,7 @@ class Device
         $params = [
             "typeid" => self::$_TYPE_ID["bind"],
             "tel" => $tel,
-            "devid" => json_encode($devid),
+            "devid" => $devid,
             "lockid" => $lockid,
             "startdate" => date("Y-m-d", strtotime($start)),
             "enddate" => date("Y-m-d", strtotime($end)),
@@ -109,7 +109,7 @@ class Device
         $params = [
             "typeid" => self::$_TYPE_ID["unlock_offline"],
             "tel" => $tel,
-            "devid" => json_encode($devid),
+            "devid" => $devid,
             "flag" => $is_remove ? "02" : "01",
             "token" => $this->token
         ];

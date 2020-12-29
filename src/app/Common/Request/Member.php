@@ -100,7 +100,7 @@ class Member
         $params = [
             "typeid" => self::$_TYPE_ID["face_offline"],
             "tel" => $tel,
-            "devid" => json_encode($devid),
+            "devid" => $devid,
             "flag" => $is_remove ? "02" : "01",
             "token" => $this->token
         ];
