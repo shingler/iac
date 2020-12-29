@@ -22,7 +22,7 @@ class Member extends Api
                 "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true, "min" => 1],
                 "nickname" => ["name" => "nickname", "desc" => "成员昵称", "type" => "string", "require" => true, "min" => 1],
                 "cardno" => ["name" => "cardno", "desc" => "卡号（6位卡号，请使用JSON数组字符串传递，单次不超过10个卡号）", "type" => "array", "format" => "json", "require" => true],
-                "devid" => ["name" => "devid", "desc" => "设备编号", "type" => "string", "require" => true, "min" => 1],
+                "devid" => ["name" => "devid", "desc" => "设备编号", "type" => "array", "format" => "json", "require" => true],
                 "lockid" => ["name" => "lockid", "desc" => "锁编号（01-10），支持逗号连接，注意请用英文半角", "type" => "string", "require" => true],
                 "start" => ["name" => "start", "desc" => "开始日期时间，格式：2020-12-21 13:30:00", "type" => "date", "require" => true, "min" => 1],
                 "end" => ["name" => "end", "desc" => "到期日期时间，格式：2020-12-21 13:30:00", "type" => "date", "require" => true, "min" => 1],
@@ -129,25 +129,25 @@ class Member extends Api
         
         //绑定成员
         $ret = $deviceModel->bind($tel, $devid, $lockid, $start, $end);
-        if ($ret["code"] != 1) {
+        if (!isset($ret["code"]) || $ret["code"] != 1) {
             return ["content" => sprintf("绑定成员失败，%s", $ret["msg"])];
         }
 
         //注册人脸
         $ret = $memberModel->addFace($tel, $filedata, $devid);
-        if ($ret["code"] != 1) {
+        if (!isset($ret["code"]) || $ret["code"] != 1) {
             return ["content" => sprintf("注册人脸失败，%s", $ret["msg"])];
         }
 
         //下发离线开锁权限
         $ret = $deviceModel->upgradeUnlock($tel, $devid, false);
-        if ($ret["code"] != "0") {
+        if (!isset($ret["code"]) || $ret["code"] != "0") {
             return ["content" => sprintf("下发离线开锁权限失败，%s", $ret["msg"])];
         }
 
         //注册离线人脸库
         $ret = $memberModel->upgradeFace($tel, $devid, false);
-        if ($ret["code"] != "0") {
+        if (!isset($ret["code"]) || $ret["code"] != "0") {
             return ["content" => sprintf("注册离线人脸库失败，%s", $ret["msg"])];
         }
 

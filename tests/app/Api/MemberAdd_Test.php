@@ -145,10 +145,6 @@ class PhpUnderControl_AppApiMemberAdd_Test extends \PHPUnit_Framework_TestCase
      * @expectedExceptionCode 400
      */
     public function testAddInvalidField($params) {
-        $param1 = $params;
-        $param1["devid"] = "aaa";
-        $rs_fail = TestRunner::go($this->url, $param1);
-
         $param2 = $params;
         $param2["cardno"] = "aaa";
         $rs_fail = TestRunner::go($this->url, $param2);
@@ -178,7 +174,7 @@ class PhpUnderControl_AppApiMemberAdd_Test extends \PHPUnit_Framework_TestCase
 //        $this->markTestSkipped("先测试失败的用例");
         sleep(3);
         $rs = TestRunner::go($this->url, $params);
-//        var_dump($rs);
+        var_dump($rs);
         $this->assertArrayHasKey("data", $rs);
     }
 
