@@ -34,7 +34,7 @@ if (!empty($_GET['language'])) {
     setcookie('language', $_GET['language'], time() + 86400 * 360, '/');
 }
 
-$projectName = \PhalApi\T('PhalApi API Framework');
+$projectName = \PhalApi\T('智能门禁接口');
 $docViewCode = ''; // 查看文档密码，为空时不限制
 
 $detailTpl = API_ROOT . '/src/view/docs/api_desc_tpl.php';
