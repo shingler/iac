@@ -1,6 +1,8 @@
 <?php
 namespace App\Common\Request;
 
+use App\Common\Exception\ApiException;
+
 class Member
 {
     private $token;
@@ -113,6 +115,7 @@ class Member
      * @return array|bool
      * {"data":{"tel":"18611106639","name":"老乐639","cishu":"999999","cardno":"777777"},"code":100101}
      * {"code":100100,"msg":"成员信息不存在"}
+     * {"code":403,"msg":"发送频繁"}
      */
     public function find($tel) {
         $url = Urls::member();
@@ -125,6 +128,8 @@ class Member
 
         if ($ret["code"] == 100101) {
             return $ret["data"];
+        } elseif ($ret["code"] == 403) {
+            throw new ApiException($ret["msg"], $ret["code"]);
         } else {
             return false;
         }

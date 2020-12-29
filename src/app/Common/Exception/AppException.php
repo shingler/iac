@@ -1,5 +1,5 @@
 <?php
-namespace App\Common;
+namespace App\Common\Exception;
 use PhalApi\Exception;
 
 class AppException extends \Exception

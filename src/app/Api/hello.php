@@ -1,7 +1,7 @@
 <?php
 namespace App\Api;
 use PhalApi\Api;
-use App\Common\MyException;
+use App\Common\Exception\AppException;
 
 class Hello extends Api
 {
@@ -20,7 +20,7 @@ class Hello extends Api
     }
 
     public function err() {
-        //throw new MyException("自定义异常", 201);
+        //throw new AppException("自定义异常", 201);
         \PhalApi\DI()->response->setRet(202);
         \PhalApi\DI()->response->setMsg("自定义消息");
         return ["content" => "123"];
