@@ -2,16 +2,11 @@
     <div class="ui container">
       <div class="ui stackable inverted divided equal height stackable grid">
         <div class="ten wide column centered">
-            <div class="column" align="center" >
-                <img src="https://www.phalapi.net/images/icon_logo.png" alt="PhalApi">
-            </div>
             <div class="column" align="center">
                 <p>
                     <strong><?php echo \PhalApi\T('A PHP framework foucs on API fast development.'); ?></strong>
                     <br />
                     © 2015-<?php echo date('Y'); ?> Powered  By <a href="http://www.phalapi.net/" target=""><?php echo \PhalApi\T('PhalApi API Framework'), ' ', PHALAPI_VERSION; ?> </a> <span id="version_update"></span>
-                    &nbsp;&nbsp;
-                    <a target="_blank" href="http://pro.phalapi.net/" class="orange"><span class="ui tiny label orange"><i class="icon arrow alternate circle up"></i>专业版<span></a>
                 </p>
             </div>
         </div>
@@ -104,29 +99,6 @@
                     e.value = cookie_value;
                 }
             });
-        }
-
-        // 检测最新版本
-        function checkLastestVersion() {
-                $.ajax({
-                    url:'https://www.phalapi.net/check_lastest_version.php',
-                    type:'get',
-                    data:{version : '$version'},
-                    success:function(res,status,xhr){
-                        if (!res.ret || res.ret != 200) {
-                            return;
-                        }
-                        if (res.data.need_upgrade >= 0) {
-                            return;
-                        }          
-
-                        $('#version_update').html('&nbsp; | &nbsp; <a target="_blank" href=" ' + res.data.url + ' "><strong>免费升级到 PhalApi ' + res.data.version + '</strong></a>');              
-                    },
-                    error:function(error){
-                        console.log(error)
-                    }
-                })
-
         }
     </script>
 

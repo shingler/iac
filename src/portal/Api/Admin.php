@@ -8,6 +8,7 @@ use PhalApi\Exception\InternalServerErrorException;
 
 /**
  * 管理员模块
+ * @ignore
  * @author dogstar 20200307
  */
 class Admin extends Api {

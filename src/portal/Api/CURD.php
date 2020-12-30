@@ -5,6 +5,7 @@ use Portal\Common\DataApi as Api;
 
 /**
  * CURD数据接口示例
+ * @ignore
  */
 class CURD extends Api {
     protected function getDataModel() {

@@ -8,6 +8,7 @@ use Portal\Domain\Plugin as PluginDomain;
 
 /**
  * 运营平台接口
+ * @ignore
  */
 class Page extends Api {
 

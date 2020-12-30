@@ -7,6 +7,7 @@ use PhalApi\Exception\BadRequestException;
 
 /**
  * 用户插件
+ * @ignore
  * @author dogstar 20200331
  *
  */
