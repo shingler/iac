@@ -41,6 +41,9 @@ class Member
             "token" => $this->token
         ];
         $ret = \App\curl_post($url, $params);
+        if ($ret["code"] != 1) {
+            \PhalApi\DI()->logger->error($ret["msg"], $params);
+        }
         return $ret;
     }
 
@@ -63,6 +66,9 @@ class Member
             "token" => $this->token
         ];
         $ret = \App\curl_post($url, $params);
+        if ($ret["code"] != 1) {
+            \PhalApi\DI()->logger->error($ret["msg"], $params);
+        }
         return $ret;
     }
 
@@ -83,6 +89,9 @@ class Member
             "token" => $this->token
         ];
         $ret = \App\curl_post($url, $params);
+        if ($ret["code"] != 1) {
+            \PhalApi\DI()->logger->error($ret["msg"], $params);
+        }
         return $ret;
     }
 
@@ -105,6 +114,9 @@ class Member
             "token" => $this->token
         ];
         $ret = \App\curl_post($url, $params);
+        if ($ret["code"] != "0") {
+            \PhalApi\DI()->logger->error($ret["msg"], $params);
+        }
         return $ret;
     }
 
@@ -127,10 +139,13 @@ class Member
         $ret = \App\curl_post($url, $params);
 
         if ($ret["code"] == 100101) {
+            //成员信息存在
             return $ret["data"];
         } elseif ($ret["code"] == 403) {
+            \PhalApi\DI()->logger->error($ret["msg"], $params);
             throw new ApiException($ret["msg"], $ret["code"]);
         } else {
+            //成员信息不存在
             return false;
         }
     }
@@ -150,6 +165,9 @@ class Member
             "token" => $this->token
         ];
         $ret = \App\curl_post($url, $params);
+        if ($ret["code"] != 1) {
+            \PhalApi\DI()->logger->error($ret["msg"], $params);
+        }
         return $ret;
     }
 

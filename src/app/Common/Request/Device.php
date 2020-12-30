@@ -43,6 +43,9 @@ class Device
             "token" => $this->token
         ];
         $ret = \App\curl_post($url, $params);
+        if ($ret["code"] != 1) {
+            \PhalApi\DI()->logger->error($ret["msg"], $params);
+        }
         return $ret;
     }
 
@@ -62,7 +65,7 @@ class Device
         $params = [
             "typeid" => self::$_TYPE_ID["update_bind"],
             "tel" => $tel,
-            "devid" => json_encode($devid),
+            "devid" => $devid,
             "lockid" => $lockid,
             "startdate" => date("Y-m-d", strtotime($start)),
             "enddate" => date("Y-m-d", strtotime($end)),
@@ -72,6 +75,9 @@ class Device
             "token" => $this->token
         ];
         $ret = \App\curl_post($url, $params);
+        if ($ret["code"] != 1) {
+            \PhalApi\DI()->logger->error($ret["msg"], $params);
+        }
         return $ret;
     }
 
@@ -87,11 +93,14 @@ class Device
         $params = [
             "typeid" => self::$_TYPE_ID["delete_bind"],
             "tel" => $tel,
-            "devid" => json_encode($devid),
+            "devid" => $devid,
             "json" => true,
             "token" => $this->token
         ];
         $ret = \App\curl_post($url, $params);
+        if ($ret["code"] != 1) {
+            \PhalApi\DI()->logger->error($ret["msg"], $params);
+        }
         return $ret;
     }
 
@@ -114,6 +123,9 @@ class Device
             "token" => $this->token
         ];
         $ret = \App\curl_post($url, $params);
+        if ($ret["code"] != "0") {
+            \PhalApi\DI()->logger->error($ret["msg"], $params);
+        }
         return $ret;
     }
 
@@ -158,6 +170,9 @@ class Device
             "token" => $this->token
         ];
         $ret = \App\curl_post($url, $params);
+        if ($ret["code"] != "0") {
+            \PhalApi\DI()->logger->error($ret["msg"], $params);
+        }
         return $ret;
     }
 
