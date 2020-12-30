@@ -73,9 +73,6 @@ class PhpUnderControl_AppApiMemberAdd_Test extends \PHPUnit_Framework_TestCase
     {
         $params["tel"] = "18611106295";
         $rs_fail = TestRunner::go($this->url, $params);
-//        $this->assertInstanceOf("App\Common\Exception\AppException", $rs_fail);
-//        $this->assertEquals(1001, $rs_fail->getCode());
-
     }
 
     /**
@@ -88,8 +85,6 @@ class PhpUnderControl_AppApiMemberAdd_Test extends \PHPUnit_Framework_TestCase
     {
         $params["filedata"] = base64_encode(file_get_contents(dirname(__FILE__).'/../../bigpic.jpeg'));
         $rs_fail = TestRunner::go($this->url, $params);
-//        $this->assertInstanceOf("App\Common\Exception\AppException", $rs_fail);
-//        $this->assertEquals(1002, $rs_fail->getCode());
     }
 
     /**
@@ -153,16 +148,10 @@ class PhpUnderControl_AppApiMemberAdd_Test extends \PHPUnit_Framework_TestCase
         $param3["lockid"] = "aaa";
         $rs_fail = TestRunner::go($this->url, $param3);
         $this->setExpectedException("App\Common\Exception\AppException", "", 1005);
-//        $this->assertInstanceOf("App\Common\Exception\AppException", $rs_fail);
-//        $this->assertEquals(1005, $rs_fail->getCode());
-
 
         $param4 = $params;
         $param4["lockid"] = "01,aaa";
         $rs_fail = TestRunner::go($this->url, $param4);
-        $this->setExpectedException("App\Common\Exception\AppException", "", 1005);
-//        $this->assertInstanceOf("App\Common\Exception\AppException", $rs_fail);
-//        $this->assertEquals(1005, $rs_fail->getCode());
     }
 
     /**
@@ -173,6 +162,7 @@ class PhpUnderControl_AppApiMemberAdd_Test extends \PHPUnit_Framework_TestCase
     {
 //        $this->markTestSkipped("先测试失败的用例");
         sleep(3);
+        var_dump($params);
         $rs = TestRunner::go($this->url, $params);
         var_dump($rs);
         $this->assertArrayHasKey("data", $rs);
@@ -189,9 +179,6 @@ class PhpUnderControl_AppApiMemberAdd_Test extends \PHPUnit_Framework_TestCase
 //        $this->markTestSkipped("先测试失败的用例");
 //        sleep(3);
         $rs = TestRunner::go($this->url, $params);
-//        var_dump($rs);
-//        $this->assertNotInstanceOf("App\Common\Exception\AppException", $rs);
-//        $this->assertEquals("403", $rs->getCode());
     }
 
 }

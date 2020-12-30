@@ -25,6 +25,7 @@ $di->debug = !empty($_GET['__debug__']) ? true : $di->config->get('sys.debug');
 
 // 日记纪录
 $di->logger = FileLogger::create($di->config->get('sys.file_logger'));
+$di->api_logger = FileLogger::create($di->config->get('sys.file_logger_api'));
 $di->callback_logger = FileLogger::create($di->config->get('sys.file_logger_callback'));
 
 // 数据操作 - 基于NotORM

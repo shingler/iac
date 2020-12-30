@@ -100,5 +100,12 @@
                 }
             });
         }
+
+        // 检测最新版本
+        function checkLastestVersion() {
+
+
+        }
+
     </script>
 

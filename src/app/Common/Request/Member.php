@@ -36,7 +36,7 @@ class Member
             "typeid" => self::$_TYPE_ID["add"],
             "nickname" => $nickname,
             "tel" => $tel,
-            "cardno" => $cardno,
+            "cardno" => json_encode($cardno),
             "cishu" => 999999,
             "token" => $this->token
         ];

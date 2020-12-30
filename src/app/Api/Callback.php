@@ -20,6 +20,7 @@ class Callback extends Api
 
     /**
      * 接收智能门禁刷脸开锁回调
+     * @method POST
      * @desc 智能门禁网关会将刷脸成功信息以异步回调的方式返回。本接口接收该数据，并写入文件日志和数据库（待定）
      * @return array
      */

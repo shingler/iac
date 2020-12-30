@@ -54,7 +54,20 @@ class Member extends Api
     /**
      * 增加人员
      * @method POST
-     * @desc 新添加一个能被智能门禁刷脸识别的用户
+     * @desc 新添加一个能被智能门禁刷脸识别的用户，注意：由于设备网关限制，每3秒只能运行一次。
+     * @return string content 操作结果反馈
+     * @return array data 如果成功，返回查询到的用户信息
+     * @return string data[].tel 电话
+     * @return string data[].name 用户昵称
+     * @return string data[].cishu 可刷卡的次数，默认999999
+     * @return string data[].cardno 卡号，默认取手机号后6位
+     * @exception 401 cardno请使用JSON数组字符串传递
+     * @exception 402 cardno的数量不能超过10
+     * @exception 1001 用户已存在
+     * @exception 1002 图片大小不应超过1M
+     * @exception 1003 开始时间/结束时间不符合日期格式
+     * @exception 1004 结束时间应该大于开始时间
+     * @exception 1005 锁编号不符合要求
      */
     public function Add()
     {
@@ -162,6 +175,7 @@ class Member extends Api
 
     /**
      * 减少人员
+     * @ignore
      * @method POST
      * @desc 将某手机号从某设备中删除
      */
@@ -172,6 +186,7 @@ class Member extends Api
 
     /**
      * 修改时效
+     * @ignore
      * @method POST
      * @desc 修改某手机号可被门禁识别的有效期
      */
@@ -182,6 +197,7 @@ class Member extends Api
 
     /**
      * 查看时效
+     * @ignore
      * @method GET
      * @desc 查看某手机号可被门禁识别的有效期
      */
