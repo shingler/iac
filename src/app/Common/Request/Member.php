@@ -128,6 +128,8 @@ class Member
      * {"data":{"tel":"18611106639","name":"老乐639","cishu":"999999","cardno":"777777"},"code":100101}
      * {"code":100100,"msg":"成员信息不存在"}
      * {"code":403,"msg":"发送频繁"}
+     * {"code":402,"msg":"token过期"}
+     * {"code":401,"msg":"token错误"}
      */
     public function find($tel) {
         $url = Urls::member();
