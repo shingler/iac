@@ -34,7 +34,7 @@ class DoorLock
             $token = $cache->get("access_token");
             $device = new Device($token);
             // 只为验证token，devid瞎写即可
-            $ret = $device->status("devid", "01");
+            $ret = $device->status("check_token", "01");
             // token有效：{"code":406,"msg":"信息不匹配"}
             // token过期：{"code":402,"msg":"token过期"}
             if ($ret["code"] == 402) {

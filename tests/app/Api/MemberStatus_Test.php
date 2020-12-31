@@ -34,26 +34,21 @@ class PhpUnderControl_AppApiMemberStatus_Test extends \PHPUnit_Framework_TestCas
 
     public function appProvider() {
         return [
-            ["18611106295", 215571]
+            ["18611106295"]
         ];
     }
 
     /**
      * 缺少必须参数
      * @dataProvider appProvider
-     * @expectedException \App\Common\Exception\AppException
-     * @expectedExceptionCode 401
+     * @expectedException PhalApi\Exception\BadRequestException
+     * @expectedExceptionCode 400
      */
-    public function testStatusEmptyField($tel, $devid) {
+    public function testStatusEmptyField($tel) {
         $tel = "";
-        TestRunner::go($this->url, compact("tel", "devid"));
-
-        $devid = "";
-        TestRunner::go($this->url, compact("tel", "devid"));
-
-        TestRunner::go($this->url, compact("devid"));
-
         TestRunner::go($this->url, compact("tel"));
+
+        TestRunner::go($this->url, []);
     }
 
     /**
@@ -62,29 +57,19 @@ class PhpUnderControl_AppApiMemberStatus_Test extends \PHPUnit_Framework_TestCas
      * @expectedException \App\Common\Exception\AppException
      * @expectedExceptionCode 1001
      */
-    public function testStatusNotSignTel($tel, $devid) {
+    public function testStatusNotSignTel($tel) {
         $tel = "18911106295";
-        TestRunner::go($this->url, compact('tel', 'devid'));
-    }
-
-    /**
-     * 不正确的设备号
-     * @dataProvider appProvider
-     * @expectedException \App\Common\Exception\AppException
-     * @expectedExceptionCode 1002
-     */
-    public function testStatusWrongDev($tel, $devid) {
-        $devid = "testdev";
-        TestRunner::go($this->url, compact('tel', 'devid'));
+        sleep(2);
+        TestRunner::go($this->url, compact('tel'));
     }
 
     /**
      * 正确返回
      * @dataProvider appProvider
      */
-    public function testStatus($tel, $devid) {
+    public function testStatus($tel) {
         sleep(2);
-        $rs = TestRunner::go($this->url, compact('tel', 'devid'));
+        $rs = TestRunner::go($this->url, compact('tel'));
         $this->assertArrayHasKey("data", $rs);
         $this->assertNotEmpty($rs["data"]);
     }
@@ -95,7 +80,7 @@ class PhpUnderControl_AppApiMemberStatus_Test extends \PHPUnit_Framework_TestCas
      * @expectedException \App\Common\Exception\ApiException
      * @expectedExceptionCode 403
      */
-    public function testStatusFrequency($tel, $devid) {
-        TestRunner::go($this->url, compact('tel', 'devid'));
+    public function testStatusFrequency($tel) {
+        TestRunner::go($this->url, compact('tel'));
     }
 }

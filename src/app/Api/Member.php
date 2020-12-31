@@ -30,18 +30,17 @@ class Member extends Api
             ],
             "Delete" => [
                 "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true],
-                "devid" => ["name" => "devid", "desc" => "设备编号（请使用JSON数组字符串传递，单次不超过20个设备）", "type" => "array", "format" => "json", "require" => true],
+                "devid" => ["name" => "devid", "desc" => "设备编号", "type" => "string", "require" => true],
             ],
             "Update" => [
                 "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true],
-                "devid" => ["name" => "devid", "desc" => "设备编号（请使用JSON数组字符串传递，单次不超过20个设备）", "type" => "array", "format" => "json", "require" => true],
+                "devid" => ["name" => "devid", "desc" => "设备编号", "type" => "string", "require" => true],
                 "lockid" => ["name" => "lockid", "desc" => "锁编号（01-10），支持逗号连接，注意请用英文半角", "type" => "string", "require" => true],
                 "start" => ["name" => "start", "desc" => "开始日期时间，格式：2020-12-21 13:30:00", "type" => "date", "require" => true],
                 "end" => ["name" => "end", "desc" => "到期日期时间，格式：2020-12-21 13:30:00", "type" => "date", "require" => true]
             ],
             "Status" => [
-                "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true],
-                "devid" => ["name" => "devid", "desc" => "设备编号（请使用JSON数组字符串传递，单次不超过20个设备）", "type" => "json", "require" => true],
+                "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true, "min" => 1]
             ]
         ];
     }
@@ -197,12 +196,25 @@ class Member extends Api
 
     /**
      * 查看时效
-     * @ignore
      * @method GET
      * @desc 查看某手机号可被门禁识别的有效期
+     * @return string content 错误信息
+     * @return array data 如果成功，返回查询到的用户信息
+     * @return string data[].tel 电话
+     * @return string data[].name 用户昵称
+     * @return string data[].cishu 可刷卡的次数，默认999999
+     * @return string data[].cardno 卡号，默认取手机号后6位
+     * @exception 1001 用户不存在
+     * @exception 403 发送频繁
      */
     public function Status()
     {
-
+        $memberModel = new MemberModel($this->token);
+        
+        if ($ret = $memberModel->find($this->tel)) {
+            return ["content" => "成员信息获取成功", "data" => $ret];
+        } else {
+            throw new AppException("用户不存在", 1001);
+        }
     }
 }
