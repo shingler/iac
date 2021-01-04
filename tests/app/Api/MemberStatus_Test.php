@@ -34,7 +34,7 @@ class PhpUnderControl_AppApiMemberStatus_Test extends \PHPUnit_Framework_TestCas
 
     public function appProvider() {
         return [
-            ["18611106295"]
+            ["18611106295", 215571]
         ];
     }
 
@@ -44,9 +44,9 @@ class PhpUnderControl_AppApiMemberStatus_Test extends \PHPUnit_Framework_TestCas
      * @expectedException PhalApi\Exception\BadRequestException
      * @expectedExceptionCode 400
      */
-    public function testStatusEmptyField($tel) {
+    public function testStatusEmptyField($tel, $devid) {
         $tel = "";
-        TestRunner::go($this->url, compact("tel"));
+        TestRunner::go($this->url, compact("tel", "devid"));
 
         TestRunner::go($this->url, []);
     }
@@ -57,21 +57,24 @@ class PhpUnderControl_AppApiMemberStatus_Test extends \PHPUnit_Framework_TestCas
      * @expectedException \App\Common\Exception\AppException
      * @expectedExceptionCode 1001
      */
-    public function testStatusNotSignTel($tel) {
+    public function testStatusNotSignTel($tel, $devid) {
         $tel = "18911106295";
         sleep(2);
-        TestRunner::go($this->url, compact('tel'));
+        TestRunner::go($this->url, compact('tel', 'devid'));
     }
 
     /**
      * 正确返回
      * @dataProvider appProvider
      */
-    public function testStatus($tel) {
+    public function testStatus($tel, $devid) {
         sleep(2);
-        $rs = TestRunner::go($this->url, compact('tel'));
+        $rs = TestRunner::go($this->url, compact('tel', 'devid'));
         $this->assertArrayHasKey("data", $rs);
         $this->assertNotEmpty($rs["data"]);
+        $this->assertArrayHasKey("member", $rs["data"]);
+        $this->assertArrayHasKey("binding", $rs["data"]);
+        $this->assertEquals($tel, $rs["data"]["member"]["tel"]);
     }
 
     /**
@@ -80,7 +83,7 @@ class PhpUnderControl_AppApiMemberStatus_Test extends \PHPUnit_Framework_TestCas
      * @expectedException \App\Common\Exception\ApiException
      * @expectedExceptionCode 403
      */
-    public function testStatusFrequency($tel) {
-        TestRunner::go($this->url, compact('tel'));
+    public function testStatusFrequency($tel, $devid) {
+        TestRunner::go($this->url, compact('tel', 'devid'));
     }
 }

@@ -40,7 +40,8 @@ class Member extends Api
                 "end" => ["name" => "end", "desc" => "到期日期时间，格式：2020-12-21 13:30:00", "type" => "date", "require" => true]
             ],
             "Status" => [
-                "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true, "min" => 1]
+                "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true, "min" => 1],
+                "devid" => ["name" => "devid", "desc" => "设备编号", "type" => "string", "require" => true, "min" => 1]
             ]
         ];
     }
@@ -200,19 +201,35 @@ class Member extends Api
      * @desc 查看某手机号可被门禁识别的有效期
      * @return string content 错误信息
      * @return array data 如果成功，返回查询到的用户信息
-     * @return string data[].tel 电话
-     * @return string data[].name 用户昵称
-     * @return string data[].cishu 可刷卡的次数，默认999999
-     * @return string data[].cardno 卡号，默认取手机号后6位
+     * @return string data[].member 会员信息
+     * @return string data[].binding 绑定信息
+     * @return string data[].member[].tel 手机号
+     * @return string data[].member[].name 姓名
+     * @return string data[].member[].tel 可刷卡的次数，默认999999
+     * @return string data[].member[].cardno 卡号，默认取手机号后6位
+     * @return string data[].binding[].startdate 开始日期
+     * @return string data[].binding[].enddate 结束日期
+     * @return string data[].binding[].starttime 开始时间
+     * @return string data[].binding[].endtime 结束时间
+     * @return string data[].binding[].devid 绑定的设备id
+     * @return string data[].binding[].week 每周绑定的日期（0~6）
      * @exception 1001 用户不存在
+     * @exception 1002 未查询到绑定信息
      * @exception 403 发送频繁
      */
     public function Status()
     {
         $memberModel = new MemberModel($this->token);
         
-        if ($ret = $memberModel->find($this->tel)) {
-            return ["content" => "成员信息获取成功", "data" => $ret];
+        if ($member = $memberModel->find($this->tel)) {
+            // 获取绑定信息
+            $deviceModel = new DeviceModel($this->token);
+            if ($binding = $deviceModel->find($this->tel, $this->devid)) {
+                return ["content" => "用户信息获取成功", "data" => compact('member', 'binding')];
+            } else {
+                throw new AppException("未查询到绑定信息", 1002);
+            }
+
         } else {
             throw new AppException("用户不存在", 1001);
         }
