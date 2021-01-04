@@ -5,6 +5,7 @@ use PhalApi\Api;
 use App\Common\Auth;
 use PhalApi\Exception\BadRequestException;
 use App\Common\Exception\ApiException;
+use App\Common\Exception\DeviceException;
 use App\Common\Request\Member as MemberModel;
 use App\Common\Request\Device as DeviceModel;
 
@@ -15,6 +16,7 @@ use App\Common\Request\Device as DeviceModel;
 class Member extends Api
 {
     protected $token;
+    protected $lockids = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"];
 
     public function getRules() {
         return [
@@ -33,11 +35,11 @@ class Member extends Api
                 "devid" => ["name" => "devid", "desc" => "设备编号", "type" => "string", "require" => true],
             ],
             "Update" => [
-                "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true],
-                "devid" => ["name" => "devid", "desc" => "设备编号", "type" => "string", "require" => true],
-                "lockid" => ["name" => "lockid", "desc" => "锁编号（01-10），支持逗号连接，注意请用英文半角", "type" => "string", "require" => true],
-                "start" => ["name" => "start", "desc" => "开始日期时间，格式：2020-12-21 13:30:00", "type" => "date", "require" => true],
-                "end" => ["name" => "end", "desc" => "到期日期时间，格式：2020-12-21 13:30:00", "type" => "date", "require" => true]
+                "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true, "min" => 1],
+                "devid" => ["name" => "devid", "desc" => "设备编号", "type" => "string", "require" => true, "min" => 1],
+                "lockid" => ["name" => "lockid", "desc" => "锁编号（01-10），支持逗号连接，注意请用英文半角", "type" => "string", "require" => true, "min" => 1],
+                "start" => ["name" => "start", "desc" => "开始日期时间，格式：2020-12-21 13:30:00", "type" => "date", "require" => true, "min" => 1],
+                "end" => ["name" => "end", "desc" => "到期日期时间，格式：2020-12-21 13:30:00", "type" => "date", "require" => true, "min" => 1]
             ],
             "Status" => [
                 "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true, "min" => 1],
@@ -106,15 +108,14 @@ class Member extends Api
         }
 
         //检查锁编号
-        $lock_ids = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"];
         if (strpos($lockid, ",") !== false) {
             $lockid_arr = explode(",", $lockid);
             foreach ($lockid_arr as $lockid) {
-                if (!in_array($lockid, $lock_ids)) {
+                if (!in_array($lockid, $this->lockids)) {
                     throw new AppException("锁编号不符合要求", 1005);
                 }
             }
-        } else if (!in_array($lockid, $lock_ids)) {
+        } else if (!in_array($lockid, $this->lockids)) {
             throw new AppException("锁编号不符合要求", 1005);
         }
 
@@ -186,13 +187,62 @@ class Member extends Api
 
     /**
      * 修改时效
-     * @ignore
      * @method POST
      * @desc 修改某手机号可被门禁识别的有效期
+     * @return string content 操作结果
+     * @return data array api返回结果
+     * @return data[].code api返回代码
+     * @return data[].msg api返回结果
+     * @exception 1001 锁编号不正确
+     * @exception 1003 开始时间/结束时间不符合日期格式
+     * @exception 1004 结束时间应该大于开始时间
+     * @exception 2001 会员信息不存在
+     * @exception 2002 设备编号错误
      */
     public function Update()
     {
+        $tel = $this->tel;
+        $devid = $this->devid;
+        $lockid = $this->lockid;
+        $start = $this->start;
+        $end = $this->end;
 
+        //参数检测
+        if (!in_array($lockid, $this->lockids)) {
+            throw new AppException("锁编号不正确", 1001);
+        }
+        if (!strtotime($start)) {
+            throw new AppException("开始时间不符合日期格式", 1003);
+        }
+        if (!strtotime($end)) {
+            throw new AppException("结束时间不符合日期格式", 1003);
+        }
+        if (strtotime($end) < strtotime($start)) {
+            throw new AppException("结束时间应该大于开始时间", 1004);
+        }
+
+        $memberModel = new MemberModel($this->token);
+        //先检查会员信息是否存在
+        $member = $memberModel->find($tel);
+        if (!$member) {
+            throw new AppException("会员信息不存在", 2001);
+        }
+
+        $deviceModel = new DeviceModel($this->token);
+        //检查绑定是否存在
+        try {
+            $binding = $deviceModel->find($tel, $devid);
+            if (!$binding) {
+                //不存在，创建绑定
+                $ret = $deviceModel->bind($tel, $devid, $lockid, $start, $end);
+            } else {
+                //修改绑定
+                $ret = $deviceModel->updateBind($tel, $devid, $lockid, $start, $end);
+            }
+            return ["content" => $ret["msg"], "data"=>$ret];
+        } catch (DeviceException $ex) {
+            throw new AppException("设备编号错误", 2002);
+        }
     }
 
     /**
@@ -224,10 +274,14 @@ class Member extends Api
         if ($member = $memberModel->find($this->tel)) {
             // 获取绑定信息
             $deviceModel = new DeviceModel($this->token);
-            if ($binding = $deviceModel->find($this->tel, $this->devid)) {
-                return ["content" => "用户信息获取成功", "data" => compact('member', 'binding')];
-            } else {
-                throw new AppException("未查询到绑定信息", 1002);
+            try {
+                if ($binding = $deviceModel->find($this->tel, $this->devid)) {
+                    return ["content" => "用户信息获取成功", "data" => compact('member', 'binding')];
+                } else {
+                    throw new AppException("未查询到绑定信息", 1002);
+                }
+            } catch (DeviceException $ex) {
+                throw new AppException("设备编号错误", 2002);
             }
 
         } else {

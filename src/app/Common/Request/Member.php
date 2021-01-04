@@ -8,7 +8,6 @@ class Member
     private $token;
     protected static $_TYPE_ID = [
         "add" => 100,
-        "update" => 203,
         "status" => 201,
         "delete" => 104,
         "find" => 101,

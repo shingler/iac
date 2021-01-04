@@ -1,6 +1,9 @@
 <?php
 namespace App\Common\Request;
 
+use App\Common\Exception\AppException;
+use App\Common\Exception\DeviceException;
+
 class Device
 {
     private $token;
@@ -135,6 +138,7 @@ class Device
      * @throws \Exception
      * @return array|bool
      * {"data":{"endtime":"23:59","starttime":"00:00","startdate":"2020-12-26","devid":"215571","enddate":"2030-12-26","week":["0","1","2","3","4","5","6"]},"code":100101}
+     * {"code":404,"msg":"传参错误：设备归属错误"}
      */
     public function find($tel, $devid) {
         $url = Urls::member();
@@ -148,6 +152,8 @@ class Device
 
         if ($ret["code"] == 100101) {
             return $ret["data"];
+        } elseif($ret["code"] == 404) {
+            throw new DeviceException($ret["msg"], $ret["code"]);
         } else {
             return false;
         }
