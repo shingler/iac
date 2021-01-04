@@ -182,6 +182,7 @@ class Device
      * @throws \Exception
      * @return bool|string
      * {"devid":"215571","status":"在线","lastopenlocktime":"未知","lastduandiantime":"未知","lastcloselocktime":"未知","lockstatus":"未知","doorstatus":"未知","qudianstatus":"未知","lastopendoortime":"未知","lastclosedoortime":"未知","lastqudiantime":"未知"}
+     * {"code":406,"msg":"信息不匹配"}
      */
     public function status($devid, $lockid) {
         $url = Urls::status();

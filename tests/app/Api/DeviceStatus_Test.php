@@ -39,8 +39,8 @@ class PhpUnderControl_AppApiDeviceStatus_Test extends \PHPUnit_Framework_TestCas
     /**
      * 缺少必须参数
      * @dataProvider appProvider
-     * @expectedException \App\Common\Exception\AppException
-     * @expectedExceptionCode 401
+     * @expectedException PhalApi\Exception\BadRequestException
+     * @expectedExceptionCode 400
      */
     public function testStatusEmptyField($devid, $lockid) {
         $devid = "";
@@ -80,20 +80,12 @@ class PhpUnderControl_AppApiDeviceStatus_Test extends \PHPUnit_Framework_TestCas
      * 正确返回
      * @dataProvider appProvider
      */
-    public function testStatus($tel, $devid) {
+    public function testStatus($devid, $lockid) {
         sleep(2);
         $rs = TestRunner::go($this->url, compact("devid", "lockid"));
         $this->assertArrayHasKey("data", $rs);
         $this->assertNotEmpty($rs["data"]);
-    }
-
-    /**
-     * 太频繁
-     * @dataProvider appProvider
-     * @expectedException \App\Common\Exception\ApiException
-     * @expectedExceptionCode 403
-     */
-    public function testStatusFrequency($tel, $devid) {
-        TestRunner::go($this->url, compact("devid", "lockid"));
+        var_dump($rs);
+        $this->assertEquals($devid, $rs["data"]["devid"]);
     }
 }
