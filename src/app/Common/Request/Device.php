@@ -1,6 +1,7 @@
 <?php
 namespace App\Common\Request;
 
+use App\Common\Exception\ApiException;
 use App\Common\Exception\AppException;
 use App\Common\Exception\DeviceException;
 
@@ -153,7 +154,7 @@ class Device
         if ($ret["code"] == 100101) {
             return $ret["data"];
         } elseif($ret["code"] == 404) {
-            throw new DeviceException($ret["msg"], $ret["code"]);
+            throw new ApiException($ret["msg"], $ret["code"]);
         } else {
             return false;
         }

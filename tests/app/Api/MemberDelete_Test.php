@@ -1,14 +1,16 @@
 <?php
 /**
- * PhalApi_App\Api\MemberStatus_Test
+ * PhalApi_App\Api\MemberDelete_Test
  *
- * 针对 ./src/app/Api/Member.php App\Api\Member 类的Status接口做PHPUnit单元测试
+ * 针对 ./src/app/Api/Member.php App\Api\Member 类的Delete接口做PHPUnit单元测试
  *
- * @author: shingler 20201230
+ * @author: shingler 20210105
  */
 
 namespace tests\App\Api;
 use App\Api\Member;
+use App\Common\Exception\AppException;
+use App\Common\Exception\DeviceException;
 use App\Model\Test;
 use PhalApi\Helper\TestRunner;
 
@@ -34,37 +36,47 @@ class PhpUnderControl_AppApiMemberDelete_Test extends \PHPUnit_Framework_TestCas
 
     public function appProvider() {
         return [
-            ["18611106295", 215571]
+            ["18611102459", 215571, "01"]
         ];
     }
 
     /**
      * 缺少必须参数
      * @dataProvider appProvider
-     * @expectedException \App\Common\Exception\AppException
-     * @expectedExceptionCode 401
+     * @expectedException \PhalApi\Exception\BadRequestException
+     * @expectedExceptionCode 400
      */
-    public function testStatusEmptyField($tel, $devid) {
+    public function testDeleteEmptyField($tel, $devid, $lockid) {
         $tel = "";
-        TestRunner::go($this->url, compact("tel", "devid"));
+        TestRunner::go($this->url, compact("tel", "devid", "lockid"));
 
         $devid = "";
+        TestRunner::go($this->url, compact("tel", "devid", "lockid"));
+
+        $lockid = "";
+        TestRunner::go($this->url, compact("tel", "devid", "lockid"));
+
+        TestRunner::go($this->url, compact("devid", "lockid"));
+
+        TestRunner::go($this->url, compact("tel", "lockid"));
+
         TestRunner::go($this->url, compact("tel", "devid"));
-
-        TestRunner::go($this->url, compact("devid"));
-
-        TestRunner::go($this->url, compact("tel"));
     }
 
     /**
      * 未注册的手机号
      * @dataProvider appProvider
      * @expectedException \App\Common\Exception\AppException
-     * @expectedExceptionCode 1001
+     * @expectedExceptionCode 1003
      */
-    public function testStatusNotSignTel($tel, $devid) {
+    public function testDeleteNotSignTel($tel, $devid, $lockid) {
         $tel = "18911106295";
-        TestRunner::go($this->url, compact('tel', 'devid'));
+        try {
+            TestRunner::go($this->url, compact('tel', 'devid', 'lockid'));
+        } catch (DeviceException $ex) {
+            $this->fail($ex->getMessage());
+        }
+        
     }
 
     /**
@@ -73,29 +85,39 @@ class PhpUnderControl_AppApiMemberDelete_Test extends \PHPUnit_Framework_TestCas
      * @expectedException \App\Common\Exception\AppException
      * @expectedExceptionCode 1002
      */
-    public function testStatusWrongDev($tel, $devid) {
+    public function testDeleteWrongDev($tel, $devid, $lockid) {
         $devid = "testdev";
-        TestRunner::go($this->url, compact('tel', 'devid'));
+        try {
+            $rs = TestRunner::go($this->url, compact('tel', 'devid', 'lockid'));
+            var_dump($rs);
+        } catch (DeviceException $ex) {
+            $this->fail($ex->getMessage());
+        }
+    }
+
+    /**
+     * 不正确的锁编号
+     * @dataProvider appProvider
+     * @expectedException \App\Common\Exception\AppException
+     * @expectedExceptionCode 1001
+     */
+    public function testDeleteWrongLock($tel, $devid, $lockid) {
+        $lockid = "testlock";
+        TestRunner::go($this->url, compact('tel', 'devid', 'lockid'));
     }
 
     /**
      * 正确返回
      * @dataProvider appProvider
      */
-    public function testStatus($tel, $devid) {
+    public function testDelete($tel, $devid, $lockid) {
         sleep(2);
-        $rs = TestRunner::go($this->url, compact('tel', 'devid'));
-        $this->assertArrayHasKey("data", $rs);
-        $this->assertNotEmpty($rs["data"]);
-    }
-
-    /**
-     * 太频繁
-     * @dataProvider appProvider
-     * @expectedException \App\Common\Exception\ApiException
-     * @expectedExceptionCode 403
-     */
-    public function testStatusFrequency($tel, $devid) {
-        TestRunner::go($this->url, compact('tel', 'devid'));
+        $rs = TestRunner::go($this->url, compact('tel', 'devid', 'lockid'));
+        try {
+            $this->assertArrayHasKey("data", $rs);
+            $this->assertNotEmpty($rs["data"]);
+        } catch (DeviceException $ex) {
+            $this->fail($ex->getMessage());
+        }
     }
 }

@@ -31,8 +31,9 @@ class Member extends Api
                 "filedata" => ["name" => "filedata", "desc" => "人脸数据，对图片二进制数据做base64编码（最大不超过1M）", "type" => "string", "require" => true, "min" => 1]
             ],
             "Delete" => [
-                "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true],
-                "devid" => ["name" => "devid", "desc" => "设备编号", "type" => "string", "require" => true],
+                "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true, "min" => 1],
+                "devid" => ["name" => "devid", "desc" => "设备编号", "type" => "string", "require" => true, "min" => 1],
+                "lockid" => ["name" => "lockid", "desc" => "锁编号（01-10）", "type" => "string", "require" => true, "min" => 1, "default" => "01"],
             ],
             "Update" => [
                 "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true, "min" => 1],
@@ -181,13 +182,60 @@ class Member extends Api
 
     /**
      * 减少人员
-     * @ignore
      * @method POST
      * @desc 将某手机号从某设备中删除
      */
     public function Delete()
     {
+        $tel = $this->tel;
+        $devid = $this->devid;
+        $lockid = $this->lockid;
+        //参数格式检查
+        if (!in_array($lockid, $this->lockids)) {
+            throw new AppException("锁编号有误", 1001);
+        }
+        //判断设备是否在线，离线状态不能删除
+        $deviceModel = new DeviceModel($this->token);
+        $device_status = $deviceModel->status($devid, $lockid);
+        if (isset($device_status["code"])) {
+            throw new AppException("设备信息有误", 1002);
+        } elseif (isset($device_status["status"]) && $device_status["status"] == "离线") {
+            throw new DeviceException("设备离线，请检查设备后再重试", 2001);
+        }
+        
+        //*****   删除流程  ****
+        $memberModel = new MemberModel($this->token);
+        //查找成员信息
+        $ret = $memberModel->find($tel);
+        if (!$ret) {
+            throw new AppException("成员信息不存在", 1003);
+        }
 
+        //检查绑定是否存在
+        try {
+            $binding = $deviceModel->find($tel, $devid);
+            if (!$binding) {
+                //绑定不存在
+                throw new AppException("绑定信息不存在", 1004);
+            }
+        } catch (ApiException $ex) {
+            throw new AppException("设备信息有误", 1002);
+        }
+
+        //更新离线人脸库
+        $res = $memberModel->upgradeFace($tel, $devid, true);
+        if (!isset($res["code"]) || $res["code"] != "0") {
+            throw new AppException(sprintf("删除离线人脸库失败，%s", $res["msg"]), 1005);
+        }
+        //更新离线开锁权限
+        $res = $deviceModel->upgradeUnlock($tel, $devid, true);
+        if (!isset($res["code"]) || $res["code"] != "0") {
+            throw new AppException(sprintf("下发离线开锁权限失败，%s", $res["msg"]), 1006);
+        }
+        //删除人脸
+        //删除绑定
+        
+        return ["content" => "删除流程"];
     }
 
     /**
