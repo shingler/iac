@@ -34,7 +34,8 @@ class PhpUnderControl_AppApiMemberStatus_Test extends \PHPUnit_Framework_TestCas
 
     public function appProvider() {
         return [
-            ["18611106295", 215571]
+            ["18611106295", 215571],
+            ["18611102459", 215571]
         ];
     }
 

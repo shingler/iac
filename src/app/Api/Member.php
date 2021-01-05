@@ -56,7 +56,7 @@ class Member extends Api
     /**
      * 增加人员
      * @method POST
-     * @desc 新添加一个能被智能门禁刷脸识别的用户，注意：由于设备网关限制，每3秒只能运行一次。
+     * @desc 新添加一个能被智能门禁刷脸识别的用户。<br/>注意：由于设备网关限制，每3秒只能运行一次。<br/>注意：如果设备离线，则无法成功更新离线人脸库和开锁权限。需要使设备在线，再次运行修改权限接口
      * @return string content 操作结果反馈
      * @return array data 如果成功，返回查询到的用户信息
      * @return string data[].tel 电话
@@ -153,16 +153,17 @@ class Member extends Api
             return ["content" => sprintf("注册人脸失败，%s", $ret["msg"])];
         }
 
+        $device_msg = "";
         //下发离线开锁权限
         $ret = $deviceModel->upgradeUnlock($tel, $devid, false);
         if (!isset($ret["code"]) || $ret["code"] != "0") {
-            return ["content" => sprintf("下发离线开锁权限失败，%s", $ret["msg"])];
+            $device_msg .= sprintf("下发离线开锁权限失败，%s", $ret["msg"]);
         }
 
         //注册离线人脸库
         $ret = $memberModel->upgradeFace($tel, $devid, false);
         if (!isset($ret["code"]) || $ret["code"] != "0") {
-            return ["content" => sprintf("注册离线人脸库失败，%s", $ret["msg"])];
+            $device_msg .= sprintf("注册离线人脸库失败，%s", $ret["msg"]);
         }
 
         //查找信息以检查
@@ -171,7 +172,11 @@ class Member extends Api
             return ["content"=>"注册完成，数据同步有延迟，请稍候"];
         }
 
-        return ["content"=>"成员新增成功", "data"=>$ret];
+        $msg = "成员新增成功";
+        if (strlen($device_msg) > 0) {
+            $msg = sprintf("%s (%s)",$msg, $device_msg);
+        }
+        return ["content" => $msg, "data" => $ret];
     }
 
     /**
@@ -187,6 +192,7 @@ class Member extends Api
 
     /**
      * 修改时效
+     * @ignore
      * @method POST
      * @desc 修改某手机号可被门禁识别的有效期
      * @return string content 操作结果
@@ -239,10 +245,28 @@ class Member extends Api
                 //修改绑定
                 $ret = $deviceModel->updateBind($tel, $devid, $lockid, $start, $end);
             }
-            return ["content" => $ret["msg"], "data"=>$ret];
         } catch (DeviceException $ex) {
             throw new AppException("设备编号错误", 2002);
         }
+        //更新离线开锁权限
+        $device_msg = "";
+        $res = $deviceModel->upgradeUnlock($tel, $devid, false);
+        if (!isset($res["code"]) || $res["code"] != "0") {
+            $device_msg .= sprintf("下发离线开锁权限失败，%s", $res["msg"]);
+        }
+
+        //更新离线人脸库
+        $res = $memberModel->upgradeFace($tel, $devid, false);
+        if (!isset($res["code"]) || $res["code"] != "0") {
+            $device_msg .= sprintf("注册离线人脸库失败，%s", $res["msg"]);
+        }
+
+        //合并消息
+        $return_msg = $ret["msg"];
+        if (strlen($device_msg) > 0) {
+            $return_msg = sprintf("%s (%s)", $return_msg, $device_msg);
+        }
+        return ["content" => $return_msg, "data"=>$ret];
     }
 
     /**
