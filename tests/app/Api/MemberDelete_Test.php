@@ -36,7 +36,7 @@ class PhpUnderControl_AppApiMemberDelete_Test extends \PHPUnit_Framework_TestCas
 
     public function appProvider() {
         return [
-            ["18611102459", 215571, "01"]
+            ["18611104163", 215571, "01"]
         ];
     }
 
@@ -114,10 +114,25 @@ class PhpUnderControl_AppApiMemberDelete_Test extends \PHPUnit_Framework_TestCas
         sleep(2);
         $rs = TestRunner::go($this->url, compact('tel', 'devid', 'lockid'));
         try {
-            $this->assertArrayHasKey("data", $rs);
-            $this->assertNotEmpty($rs["data"]);
+            $this->assertArrayHasKey("content", $rs);
         } catch (DeviceException $ex) {
             $this->fail($ex->getMessage());
+        } catch (AppException $ex) {
+            $this->fail($ex->getMessage());
+        } catch (\Exception $ex) {
+            $this->fail($ex->getMessage());
         }
+        //查询是否存在
+        sleep(2);
+        try {
+            $rs = TestRunner::go("s=Member.Status", compact('tel', 'devid'));
+        } catch (AppException $ex) {
+            if ($ex->getCode() != 1001) {
+                $this->fail($ex->getMessage());
+            }
+        } catch (\Exception $ex) {
+            $this->fail($ex->getMessage());
+        }
+        
     }
 }
