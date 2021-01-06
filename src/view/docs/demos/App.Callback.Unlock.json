@@ -1,0 +1,21 @@
+{
+    "code":"900",
+    "devid":"215571",
+    "status":"人脸识别成功",
+    "reqstatus":"1",
+    "mid":"135010",
+    "flag":"0",
+    "uid":"18611102795",
+    "imageurl":"http:\/\/huweibing-1253704117.cos.ap-guangzhou.myqcloud.com\/215571\/2021-01-06\/99e5e5ed-e881-4fa7-902c-e325bba6f981.jpg",
+    "temperature":"0.0",
+    "addtime":"2021-01-06 15:41:19"
+}
+{
+    "code":"901",
+    "devid":"215571",
+    "status":"开锁成功",
+    "type":"人脸识别",
+    "uid":"18611102795",
+    "lockid":"01",
+    "addtime":"2021-01-06 15:41:19"
+}
