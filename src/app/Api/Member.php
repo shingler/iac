@@ -38,7 +38,7 @@ class Member extends Api
             "Update" => [
                 "tel" => ["name" => "tel", "desc" => "国内11位手机号", "type" => "string", "require" => true, "min" => 1],
                 "devid" => ["name" => "devid", "desc" => "设备编号", "type" => "string", "require" => true, "min" => 1],
-                "lockid" => ["name" => "lockid", "desc" => "锁编号（01-10），支持逗号连接，注意请用英文半角", "type" => "string", "require" => true, "min" => 1],
+                "lockid" => ["name" => "lockid", "desc" => "锁编号（01-10）", "type" => "string", "require" => true, "min" => 1],
                 "start" => ["name" => "start", "desc" => "开始日期时间，格式：2020-12-21 13:30:00", "type" => "date", "require" => true, "min" => 1],
                 "end" => ["name" => "end", "desc" => "到期日期时间，格式：2020-12-21 13:30:00", "type" => "date", "require" => true, "min" => 1]
             ],
@@ -64,15 +64,15 @@ class Member extends Api
      * @return string data[].name 用户昵称
      * @return string data[].cishu 可刷卡的次数，默认999999
      * @return string data[].cardno 卡号，默认取手机号后6位
-     * @exception 401 cardno请使用JSON数组字符串传递
-     * @exception 402 cardno的数量不能超过10
-     * @exception 1001 用户已存在
-     * @exception 1002 图片大小不应超过1M
-     * @exception 1003 开始时间/结束时间不符合日期格式
-     * @exception 1004 结束时间应该大于开始时间
-     * @exception 1005 锁编号不符合要求
-     * @exception 1006 设备信息有误
+     * @exception 1001 开始时间/结束时间不符合日期格式
+     * @exception 1002 结束时间应该大于开始时间
+     * @exception 1003 设备信息有误
+     * @exception 1004 锁编号不符合要求
+     * @exception 1005 图片大小不应超过1M
+     * @exception 1006 cardno请使用JSON数组字符串传递
+     * @exception 1007 cardno的数量不能超过10
      * @exception 2001 设备离线，请检查设备后再重试
+     * @exception 2002 用户已存在
      */
     public function Add()
     {
@@ -85,41 +85,40 @@ class Member extends Api
         $end = $this->end;
         $filedata = $this->filedata;
 
-        //json数据检查
-        if (!is_array($cardno)) {
-            throw new BadRequestException("cardno请使用JSON数组字符串传递", 1);
-        }
-        if (count($cardno) > 10) {
-            throw new BadRequestException("cardno的数量不能超过10", 2);
-        }
-
         //检查日期格式
         if (!strtotime($start)) {
-            throw new AppException("开始时间不符合日期格式", 1003);
+            throw new AppException("开始时间不符合日期格式", 1001);
         }
         if (!strtotime($end)) {
-            throw new AppException("结束时间不符合日期格式", 1003);
+            throw new AppException("结束时间不符合日期格式", 1001);
         }
         if (strtotime($end) < strtotime($start)) {
-            throw new AppException("结束时间应该大于开始时间", 1004);
+            throw new AppException("结束时间应该大于开始时间", 1002);
         }
 
+        //json数据检查
+        if (!is_array($cardno)) {
+            throw new AppException("cardno请使用JSON数组字符串传递", 1006);
+        }
+        if (count($cardno) > 10) {
+            throw new AppException("cardno的数量不能超过10", 1007);
+        }
         //检查锁编号
         if (strpos($lockid, ",") !== false) {
             $lockid_arr = explode(",", $lockid);
             foreach ($lockid_arr as $lockid) {
                 if (!in_array($lockid, $this->lockids)) {
-                    throw new AppException("锁编号不符合要求", 1005);
+                    throw new AppException("锁编号不符合要求", 1004);
                 }
             }
         } else if (!in_array($lockid, $this->lockids)) {
-            throw new AppException("锁编号不符合要求", 1005);
+            throw new AppException("锁编号不符合要求", 1004);
         }
 
         //检查文件大小
         $filesize = strlen($filedata)-(strlen($filedata)/8)*2;
         if ($filesize > 1024*1024) {
-            throw new AppException("图片大小不应超过1M", 1002);
+            throw new AppException("图片大小不应超过1M", 1005);
         }
 
         $memberModel = new MemberModel($this->token);
@@ -128,7 +127,7 @@ class Member extends Api
         //判断设备是否在线，离线状态不能删除
         $device_status = $deviceModel->status($devid, $lockid);
         if (isset($device_status["code"])) {
-            throw new AppException("设备信息有误", 1006);
+            throw new AppException("设备信息有误", 1003);
         } elseif (isset($device_status["status"]) && $device_status["status"] == "离线") {
             throw new DeviceException("设备离线，请检查设备后再重试", 2001);
         }
@@ -136,39 +135,39 @@ class Member extends Api
         //检查人员是否已存在
         $ret = $memberModel->find($tel);
         if ($ret) {
-            throw new AppException("用户已存在", 1001);
+            throw new AppException("用户已存在", 2002);
         }
 
         //新增成员
         $ret = $memberModel->add($nickname, $tel, $cardno);
         //{"code":1,"msg":"成功"}
         if ($ret["code"] != 1) {
-            return ["content" => "成员新增失败，".$ret["msg"]];
+            throw new ApiException("成员新增失败，".$ret["msg"], 3000 + $ret["typeid"]);
         }
         
         //绑定成员
         $ret = $deviceModel->bind($tel, $devid, $lockid, $start, $end);
         if (!isset($ret["code"]) || $ret["code"] != 1) {
-            return ["content" => sprintf("绑定成员失败，%s", $ret["msg"])];
+            throw new ApiException(sprintf("绑定成员失败，%s", $ret["msg"]), 3000 + $ret["typeid"]);
         }
 
         //注册人脸
         $ret = $memberModel->addFace($tel, $filedata, $devid);
         if (!isset($ret["code"]) || $ret["code"] != 1) {
-            return ["content" => sprintf("注册人脸失败，%s", $ret["msg"])];
+            throw new ApiException(sprintf("注册人脸失败，%s", $ret["msg"]), 3000 + $ret["typeid"]);
         }
 
         $device_msg = "";
         //下发离线开锁权限
         $ret = $deviceModel->upgradeUnlock($tel, $devid, false);
         if (!isset($ret["code"]) || $ret["code"] != "0") {
-            $device_msg .= sprintf("下发离线开锁权限失败，%s", $ret["msg"]);
+            throw new ApiException(sprintf("下发离线开锁权限失败，%s", $ret["msg"]), 3000 + $ret["typeid"]);
         }
 
         //注册离线人脸库
         $ret = $memberModel->upgradeFace($tel, $devid, false);
         if (!isset($ret["code"]) || $ret["code"] != "0") {
-            $device_msg .= sprintf("注册离线人脸库失败，%s", $ret["msg"]);
+            throw new ApiException(sprintf("注册离线人脸库失败，%s", $ret["msg"]), 3000 + $ret["typeid"]);
         }
 
         //查找信息以检查
@@ -188,15 +187,11 @@ class Member extends Api
      * 减少人员
      * @method POST
      * @desc 将某手机号从某设备中删除<br/>注意：设备离线将直接报错
-     * @exception 1001 锁编号有误
-     * @exception 1002 设备信息有误
-     * @exception 1003 成员信息不存在
-     * @exception 1004 绑定信息不存在
-     * @exception 1005 删除离线人脸库失败
-     * @exception 1006 下发离线开锁权限失败
-     * @exception 1007 删除人脸信息失败
-     * @exception 1008 删除绑定失败
+     * @exception 1003 设备信息有误
+     * @exception 1004 锁编号有误
      * @exception 2001 设备离线，请检查设备后再重试
+     * @exception 2003 成员信息不存在
+     * @exception 2004 绑定信息不存在
      * @return string content
      */
     public function Delete()
@@ -206,13 +201,13 @@ class Member extends Api
         $lockid = $this->lockid;
         //参数格式检查
         if (!in_array($lockid, $this->lockids)) {
-            throw new AppException("锁编号有误", 1001);
+            throw new AppException("锁编号有误", 1004);
         }
         //判断设备是否在线，离线状态不能删除
         $deviceModel = new DeviceModel($this->token);
         $device_status = $deviceModel->status($devid, $lockid);
         if (isset($device_status["code"])) {
-            throw new AppException("设备信息有误", 1002);
+            throw new AppException("设备信息有误", 1003);
         } elseif (isset($device_status["status"]) && $device_status["status"] == "离线") {
             throw new DeviceException("设备离线，请检查设备后再重试", 2001);
         }
@@ -222,7 +217,7 @@ class Member extends Api
         //查找成员信息
         $ret = $memberModel->find($tel);
         if (!$ret) {
-            throw new AppException("成员信息不存在", 1003);
+            throw new AppException("成员信息不存在", 2003);
         }
 
         //检查绑定是否存在
@@ -230,31 +225,31 @@ class Member extends Api
             $binding = $deviceModel->find($tel, $devid);
             if (!$binding) {
                 //绑定不存在
-                throw new AppException("绑定信息不存在", 1004);
+                throw new AppException("绑定信息不存在", 2004);
             }
         } catch (ApiException $ex) {
-            throw new AppException("设备信息有误", 1002);
+            throw new AppException("设备信息有误", 1003);
         }
 
         //更新离线人脸库
         $res = $memberModel->upgradeFace($tel, $devid, true);
         if (!isset($res["code"]) || $res["code"] != "0") {
-            throw new AppException(sprintf("删除离线人脸库失败，%s", $res["msg"]), 1005);
+            throw new AppException(sprintf("删除离线人脸库失败，%s", $res["msg"]), 3000 + $res["typeid"]);
         }
         //更新离线开锁权限
         $res = $deviceModel->upgradeUnlock($tel, $devid, true);
         if (!isset($res["code"]) || $res["code"] != "0") {
-            throw new AppException(sprintf("下发离线开锁权限失败，%s", $res["msg"]), 1006);
+            throw new AppException(sprintf("下发离线开锁权限失败，%s", $res["msg"]), 3000 + $res["typeid"]);
         }
         //删除人脸
         $res = $memberModel->deleteFace($tel, $devid);
         if (!isset($res["code"]) || $res["code"] != "1") {
-            throw new AppException(sprintf("删除人脸信息失败，%s", $res["msg"]), 1007);
+            throw new AppException(sprintf("删除人脸信息失败，%s", $res["msg"]), 3000 + $res["typeid"]);
         }
         //删除绑定
         $res = $deviceModel->deleteBind($tel, $devid);
         if (!isset($res["code"]) || $res["code"] != "1") {
-            throw new AppException(sprintf("删除绑定失败，%s", $res["msg"]), 1008);
+            throw new AppException(sprintf("删除绑定失败，%s", $res["msg"]), 3000 + $res["typeid"]);
         }
         //删除会员
         $res = $memberModel->delete($tel);
@@ -270,12 +265,12 @@ class Member extends Api
      * @return data array api返回结果
      * @return data[].code api返回代码
      * @return data[].msg api返回结果
-     * @exception 1001 锁编号不正确
-     * @exception 1003 开始时间/结束时间不符合日期格式
-     * @exception 1004 结束时间应该大于开始时间
-     * @exception 1006 会员信息不存在
-     * @exception 1007 设备编号错误
+     * @exception 1001 开始时间/结束时间不符合日期格式
+     * @exception 1002 结束时间应该大于开始时间
+     * @exception 1003 设备编号错误
+     * @exception 1004 锁编号不正确
      * @exception 2001 设备离线，请检查设备后再重试
+     * @exception 2003 会员信息不存在
      */
     public function Update()
     {
@@ -287,37 +282,25 @@ class Member extends Api
 
         //参数检测
         if (!in_array($lockid, $this->lockids)) {
-            throw new AppException("锁编号不正确", 1001);
+            throw new AppException("锁编号不正确", 1004);
         }
         if (!strtotime($start)) {
-            throw new AppException("开始时间不符合日期格式", 1003);
+            throw new AppException("开始时间不符合日期格式", 1001);
         }
         if (!strtotime($end)) {
-            throw new AppException("结束时间不符合日期格式", 1003);
+            throw new AppException("结束时间不符合日期格式", 1001);
         }
         if (strtotime($end) < strtotime($start)) {
-            throw new AppException("结束时间应该大于开始时间", 1004);
+            throw new AppException("结束时间应该大于开始时间", 1002);
         }
 
         $memberModel = new MemberModel($this->token);
         $deviceModel = new DeviceModel($this->token);
 
-        //检查锁编号
-        if (strpos($lockid, ",") !== false) {
-            $lockid_arr = explode(",", $lockid);
-            foreach ($lockid_arr as $lockid) {
-                if (!in_array($lockid, $this->lockids)) {
-                    throw new AppException("锁编号不符合要求", 1005);
-                }
-            }
-        } else if (!in_array($lockid, $this->lockids)) {
-            throw new AppException("锁编号不符合要求", 1005);
-        }
-
         //检查设备是否在线
         $device_status = $deviceModel->status($devid, $lockid);
         if (isset($device_status["code"])) {
-            throw new AppException("设备信息有误", 1006);
+            throw new AppException("设备信息有误", 1003);
         } elseif (isset($device_status["status"]) && $device_status["status"] == "离线") {
             throw new DeviceException("设备离线，请检查设备后再重试", 2001);
         }
@@ -325,7 +308,7 @@ class Member extends Api
         //先检查会员信息是否存在
         $member = $memberModel->find($tel);
         if (!$member) {
-            throw new AppException("会员信息不存在", 1007);
+            throw new AppException("会员信息不存在", 2003);
         }
         
         //检查绑定是否存在
@@ -339,26 +322,22 @@ class Member extends Api
                 $ret = $deviceModel->updateBind($tel, $devid, $lockid, $start, $end);
             }
         } catch (DeviceException $ex) {
-            throw new AppException("设备编号错误", 1006);
+            throw new AppException("设备编号错误", 1003);
         }
         //更新离线开锁权限
-        $device_msg = "";
         $res = $deviceModel->upgradeUnlock($tel, $devid, false);
         if (!isset($res["code"]) || $res["code"] != "0") {
-            $device_msg .= sprintf("下发离线开锁权限失败，%s", $res["msg"]);
+            throw new ApiException(sprintf("下发离线开锁权限失败，%s", $res["msg"]), 3000 + $res["typeid"]);
         }
 
         //更新离线人脸库
         $res = $memberModel->upgradeFace($tel, $devid, false);
         if (!isset($res["code"]) || $res["code"] != "0") {
-            $device_msg .= sprintf("注册离线人脸库失败，%s", $res["msg"]);
+            throw new ApiException(sprintf("注册离线人脸库失败，%s", $res["msg"]), 3000 + $res["typeid"]);
         }
 
         //合并消息
         $return_msg = $ret["msg"];
-        if (strlen($device_msg) > 0) {
-            $return_msg = sprintf("%s (%s)", $return_msg, $device_msg);
-        }
         return ["content" => $return_msg, "data"=>$ret];
     }
 
@@ -380,8 +359,9 @@ class Member extends Api
      * @return string data[].binding[].endtime 结束时间
      * @return string data[].binding[].devid 绑定的设备id
      * @return string data[].binding[].week 每周绑定的日期（0~6）
-     * @exception 1001 用户不存在
-     * @exception 1002 未查询到绑定信息
+     * @exception 1003 设备编号错误
+     * @exception 2003 用户不存在
+     * @exception 2004 未查询到绑定信息
      * @exception 403 发送频繁
      */
     public function Status()
@@ -395,14 +375,14 @@ class Member extends Api
                 if ($binding = $deviceModel->find($this->tel, $this->devid)) {
                     return ["content" => "用户信息获取成功", "data" => compact('member', 'binding')];
                 } else {
-                    throw new AppException("未查询到绑定信息", 1002);
+                    throw new AppException("未查询到绑定信息", 2004);
                 }
-            } catch (DeviceException $ex) {
-                throw new AppException("设备编号错误", 2002);
+            } catch (ApiException $ex) {
+                throw new AppException("设备编号错误", 1003);
             }
 
         } else {
-            throw new AppException("用户不存在", 1001);
+            throw new AppException("用户不存在", 2003);
         }
     }
 }

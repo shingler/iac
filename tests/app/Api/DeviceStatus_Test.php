@@ -58,7 +58,7 @@ class PhpUnderControl_AppApiDeviceStatus_Test extends \PHPUnit_Framework_TestCas
      * 不正确的锁编号
      * @dataProvider appProvider
      * @expectedException \App\Common\Exception\AppException
-     * @expectedExceptionCode 1002
+     * @expectedExceptionCode 1004
      */
     public function testStatusWrongLock($devid, $lockid) {
         $lockid = "aaa";
@@ -69,7 +69,7 @@ class PhpUnderControl_AppApiDeviceStatus_Test extends \PHPUnit_Framework_TestCas
      * 不正确的设备号
      * @dataProvider appProvider
      * @expectedException \App\Common\Exception\AppException
-     * @expectedExceptionCode 1001
+     * @expectedExceptionCode 1003
      */
     public function testStatusWrongDev($devid, $lockid) {
         $devid = "testdev";

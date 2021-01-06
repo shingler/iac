@@ -10,8 +10,8 @@
 namespace tests\App\Api;
 use App\Api\Member;
 use App\Common\Request\Device;
-use PhalApi\Exception\BadRequestException;
 use App\Common\Exception\AppException;
+use App\Common\Exception\DeviceException;
 use PhalApi\Helper\TestRunner;
 
 require_once dirname(__FILE__) . '/../../bootstrap.php';
@@ -82,23 +82,21 @@ class PhpUnderControl_AppApiMemberUpdate_Test extends \PHPUnit_Framework_TestCas
     /**
      * 新增不合理的日期
      * @dataProvider appProvider
-     * @expectedException App\Common\Exception\AppException
-     * @expectedExceptionCode 1004
      */
     public function testUpdateInvalidDate($params) {
         $param1 = $params;
         $param1["start"] = "test start";
-        $this->setExpectedException("\App\Common\Exception\AppException", "", 1003);
+        $this->setExpectedException("\App\Common\Exception\AppException", "", 1001);
         $rs_fail1 = TestRunner::go($this->url, $param1);
 
         $param2 = $params;
         $param2["end"] = "test end";
-        $this->setExpectedException("\App\Common\Exception\AppException", "", 1003);
+        $this->setExpectedException("\App\Common\Exception\AppException", "", 1001);
         $rs_fail2 = TestRunner::go($this->url, $param2);
 
         $param3 = $params;
         $param3["end"] = date("Y-m-d H:i", strtotime("-1day"));
-        $this->setExpectedException("\App\Common\Exception\AppException", "", 1004);
+        $this->setExpectedException("\App\Common\Exception\AppException", "", 1002);
         $rs_fail3 = TestRunner::go($this->url, $param3);
     }
 
@@ -106,19 +104,23 @@ class PhpUnderControl_AppApiMemberUpdate_Test extends \PHPUnit_Framework_TestCas
      * 不存在的手机号
      * @dataProvider appProvider
      * @expectedException App\Common\Exception\AppException
-     * @expectedExceptionCode 2001
+     * @expectedExceptionCode 2003
      */
     public function testUpdateNotSignTel($params) {
         $param = $params;
         $param["tel"] = "18912345678";
-        $rs_fail = TestRunner::go($this->url, $param);
+        try {
+            $rs_fail = TestRunner::go($this->url, $param);
+        } catch (DeviceException $ex) {
+            $this->fail($ex->getMessage());
+        }
     }
 
     /**
      * 不匹配的设备号
      * @dataProvider appProvider
      * @expectedException App\Common\Exception\AppException
-     * @expectedExceptionCode 2002
+     * @expectedExceptionCode 1003
      */
     public function testUpdateWrongDev($params) {
         //测试用例会访问对方接口，有频次限制
@@ -132,7 +134,7 @@ class PhpUnderControl_AppApiMemberUpdate_Test extends \PHPUnit_Framework_TestCas
      * 错误的锁编号
      * @dataProvider appProvider
      * @expectedException App\Common\Exception\AppException
-     * @expectedExceptionCode 1001
+     * @expectedExceptionCode 1004
      */
     public function testUpdateWrongLock($params) {
         $param3 = $params;
@@ -148,7 +150,6 @@ class PhpUnderControl_AppApiMemberUpdate_Test extends \PHPUnit_Framework_TestCas
     {
 //        $this->markTestSkipped("先测试失败的用例");
         sleep(2);
-        var_dump($params);
         //获取修改前的时效，用于和修改后的做对比
         $rs_before = TestRunner::go("s=Member.Status", ["devid" => $params["devid"], "tel" => $params["tel"]]);
         $before_datetime = sprintf("%s %s", $rs_before["data"]["binding"]["enddate"], $rs_before["data"]["binding"]["endtime"]);
@@ -156,19 +157,23 @@ class PhpUnderControl_AppApiMemberUpdate_Test extends \PHPUnit_Framework_TestCas
         echo sprintf("修改前的时间字符串为%s，时间戳为%s", $before_datetime, $before_ts);
 
         sleep(2);
-        $rs = TestRunner::go($this->url, $params);
-        var_dump($rs);
-        $this->assertArrayHasKey("data", $rs);
-        $this->assertEquals(1, $rs["data"]["code"]);
+        try{ 
+            $rs = TestRunner::go($this->url, $params);
+            var_dump($rs);
+            $this->assertArrayHasKey("data", $rs);
+            $this->assertEquals(1, $rs["data"]["code"]);
 
-        //获取修改后的时效
-        sleep(2);
-        $rs_after = TestRunner::go("s=Member.Status", ["devid" => $params["devid"], "tel" => $params["tel"]]);
-        $after_datetime = sprintf("%s %s", $rs_before["data"]["binding"]["enddate"], $rs_before["data"]["binding"]["endtime"]);
-        $after_ts = strtotime($after_datetime);
-        echo sprintf("修改后的时间字符串为%s，时间戳为%s", $after_datetime, $after_ts);
+            //获取修改后的时效
+            sleep(2);
+            $rs_after = TestRunner::go("s=Member.Status", ["devid" => $params["devid"], "tel" => $params["tel"]]);
+            $after_datetime = sprintf("%s %s", $rs_before["data"]["binding"]["enddate"], $rs_before["data"]["binding"]["endtime"]);
+            $after_ts = strtotime($after_datetime);
+            echo sprintf("修改后的时间字符串为%s，时间戳为%s", $after_datetime, $after_ts);
 
-        $this->assertGreaterThanOrEqual($before_ts, $after_ts);
+            $this->assertGreaterThanOrEqual($before_ts, $after_ts);
+        } catch (DeviceException $ex) {
+            $this->fail($ex->getMessage());
+        }
         
     }
 
@@ -181,8 +186,11 @@ class PhpUnderControl_AppApiMemberUpdate_Test extends \PHPUnit_Framework_TestCas
     public function testAddFrequently($params)
     {
 //        $this->markTestSkipped("先测试失败的用例");
-//        sleep(3);
-        $rs = TestRunner::go($this->url, $params);
+        try{
+            $rs = TestRunner::go($this->url, $params);
+        } catch (DeviceException $ex) {
+            $this->fail($ex->getMessage());
+        }
     }
 
 }

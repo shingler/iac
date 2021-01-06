@@ -12,6 +12,7 @@ use App\Api\Member;
 use App\Common\Request\Device;
 use PhalApi\Exception\BadRequestException;
 use App\Common\Exception\AppException;
+use App\Common\Exception\DeviceException;
 use PhalApi\Helper\TestRunner;
 
 require_once dirname(__FILE__) . '/../../bootstrap.php';
@@ -67,19 +68,23 @@ class PhpUnderControl_AppApiMemberAdd_Test extends \PHPUnit_Framework_TestCase
      * 新增一个已有账号
      * @dataProvider appProvider
      * @expectedException App\Common\Exception\AppException
-     * @expectedExceptionCode 1001
+     * @expectedExceptionCode 2002
      */ 
     public function testAddExist($params)
     {
         $params["tel"] = "18611106295";
-        $rs_fail = TestRunner::go($this->url, $params);
+        try {
+            $rs_fail = TestRunner::go($this->url, $params);
+        } catch (DeviceException $ex) {
+            $this->fail($ex->getMessage());
+        }
     }
 
     /**
      * 新增大于1M的照片用例
      * @dataProvider appProvider
      * @expectedException App\Common\Exception\AppException
-     * @expectedExceptionCode 1002
+     * @expectedExceptionCode 1005
      */ 
     public function testAddInvalidFace($params)
     {
@@ -119,17 +124,17 @@ class PhpUnderControl_AppApiMemberAdd_Test extends \PHPUnit_Framework_TestCase
     public function testAddInvalidDate($params) {
         $param1 = $params;
         $param1["start"] = "test start";
-        $this->setExpectedException("\App\Common\Exception\AppException", "", 1003);
+        $this->setExpectedException("\App\Common\Exception\AppException", "", 1001);
         $rs_fail1 = TestRunner::go($this->url, $param1);
 
         $param2 = $params;
         $param2["end"] = "test end";
-        $this->setExpectedException("\App\Common\Exception\AppException", "", 1003);
+        $this->setExpectedException("\App\Common\Exception\AppException", "", 1001);
         $rs_fail2 = TestRunner::go($this->url, $param2);
 
         $param3 = $params;
         $param3["end"] = date("Y-m-d H:i", strtotime("-1day"));
-        $this->setExpectedException("\App\Common\Exception\AppException", "", 1004);
+        $this->setExpectedException("\App\Common\Exception\AppException", "", 1002);
         $rs_fail3 = TestRunner::go($this->url, $param3);
     }
 
@@ -147,11 +152,29 @@ class PhpUnderControl_AppApiMemberAdd_Test extends \PHPUnit_Framework_TestCase
         $param3 = $params;
         $param3["lockid"] = "aaa";
         $rs_fail = TestRunner::go($this->url, $param3);
-        $this->setExpectedException("App\Common\Exception\AppException", "", 1005);
+        $this->setExpectedException("App\Common\Exception\AppException", "", 1004);
 
         $param4 = $params;
         $param4["lockid"] = "01,aaa";
         $rs_fail = TestRunner::go($this->url, $param4);
+    }
+
+    /**
+     * 不正确的设备号
+     * @dataProvider appProvider
+     * @expectedException \App\Common\Exception\AppException
+     * @expectedExceptionCode 1002
+     */
+    public function testDeleteWrongDev($params) {
+        $tel = $params["tel"];
+        $lockid = $params["lockid"];
+        $devid = "testdev";
+        try {
+            $rs = TestRunner::go($this->url, compact('tel', 'devid', 'lockid'));
+            var_dump($rs);
+        } catch (DeviceException $ex) {
+            $this->fail($ex->getMessage());
+        }
     }
 
     /**
@@ -162,10 +185,13 @@ class PhpUnderControl_AppApiMemberAdd_Test extends \PHPUnit_Framework_TestCase
     {
 //        $this->markTestSkipped("先测试失败的用例");
         sleep(3);
-        var_dump($params);
-        $rs = TestRunner::go($this->url, $params);
-        var_dump($rs);
-        $this->assertArrayHasKey("data", $rs);
+        try {
+            $rs = TestRunner::go($this->url, $params);
+            var_dump($rs);
+            $this->assertArrayHasKey("data", $rs);
+        } catch (DeviceException $ex) {
+            $this->fail($ex->getMessage());
+        }
     }
 
     /**
@@ -176,9 +202,11 @@ class PhpUnderControl_AppApiMemberAdd_Test extends \PHPUnit_Framework_TestCase
      */
     public function testAddFrequently($params)
     {
-//        $this->markTestSkipped("先测试失败的用例");
-//        sleep(3);
-        $rs = TestRunner::go($this->url, $params);
+        try {
+            $rs = TestRunner::go($this->url, $params);
+        } catch (DeviceException $ex) {
+            $this->fail($ex->getMessage());
+        }
     }
 
 }

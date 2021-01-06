@@ -42,6 +42,7 @@ class Member
         $ret = \App\curl_post($url, $params);
         if ($ret["code"] != 1) {
             \PhalApi\DI()->logger->error($ret["msg"], $params);
+            $ret["typeid"] = $params["typeid"];
         }
         return $ret;
     }
@@ -67,6 +68,7 @@ class Member
         $ret = \App\curl_post($url, $params);
         if ($ret["code"] != 1) {
             \PhalApi\DI()->logger->error($ret["msg"], $params);
+            $ret["typeid"] = $params["typeid"];
         }
         return $ret;
     }
@@ -90,6 +92,7 @@ class Member
         $ret = \App\curl_post($url, $params);
         if ($ret["code"] != 1) {
             \PhalApi\DI()->logger->error($ret["msg"], $params);
+            $ret["typeid"] = $params["typeid"];
         }
         return $ret;
     }
@@ -115,6 +118,7 @@ class Member
         $ret = \App\curl_post($url, $params);
         if ($ret["code"] != "0") {
             \PhalApi\DI()->logger->error($ret["msg"], $params);
+            $ret["typeid"] = $params["typeid"];
         }
         return $ret;
     }
@@ -168,6 +172,7 @@ class Member
         $ret = \App\curl_post($url, $params);
         if ($ret["code"] != 1) {
             \PhalApi\DI()->logger->error($ret["msg"], $params);
+            $ret["typeid"] = $params["typeid"];
         }
         return $ret;
     }

@@ -83,7 +83,7 @@ class PhpUnderControl_AppApiMemberDelete_Test extends \PHPUnit_Framework_TestCas
      * 不正确的设备号
      * @dataProvider appProvider
      * @expectedException \App\Common\Exception\AppException
-     * @expectedExceptionCode 1002
+     * @expectedExceptionCode 1003
      */
     public function testDeleteWrongDev($tel, $devid, $lockid) {
         $devid = "testdev";
@@ -99,7 +99,7 @@ class PhpUnderControl_AppApiMemberDelete_Test extends \PHPUnit_Framework_TestCas
      * 不正确的锁编号
      * @dataProvider appProvider
      * @expectedException \App\Common\Exception\AppException
-     * @expectedExceptionCode 1001
+     * @expectedExceptionCode 1004
      */
     public function testDeleteWrongLock($tel, $devid, $lockid) {
         $lockid = "testlock";
@@ -112,8 +112,8 @@ class PhpUnderControl_AppApiMemberDelete_Test extends \PHPUnit_Framework_TestCas
      */
     public function testDelete($tel, $devid, $lockid) {
         sleep(2);
-        $rs = TestRunner::go($this->url, compact('tel', 'devid', 'lockid'));
         try {
+            $rs = TestRunner::go($this->url, compact('tel', 'devid', 'lockid'));
             $this->assertArrayHasKey("content", $rs);
         } catch (DeviceException $ex) {
             $this->fail($ex->getMessage());

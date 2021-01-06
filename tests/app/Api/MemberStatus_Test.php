@@ -34,8 +34,7 @@ class PhpUnderControl_AppApiMemberStatus_Test extends \PHPUnit_Framework_TestCas
 
     public function appProvider() {
         return [
-            ["18611106295", 215571],
-            ["18611102459", 215571]
+            ["18611106295", 215571]
         ];
     }
 
@@ -48,15 +47,29 @@ class PhpUnderControl_AppApiMemberStatus_Test extends \PHPUnit_Framework_TestCas
     public function testStatusEmptyField($tel, $devid) {
         $tel = "";
         TestRunner::go($this->url, compact("tel", "devid"));
+        $devid = "";
+        TestRunner::go($this->url, compact("tel", "devid"));
 
-        TestRunner::go($this->url, []);
+        TestRunner::go($this->url, compact("tel"));
+        TestRunner::go($this->url, compact("devid"));
+    }
+
+    /**
+     * 不正确的设备号
+     * @dataProvider appProvider
+     * @expectedException \App\Common\Exception\AppException
+     * @expectedExceptionCode 1003
+     */
+    public function testDeleteWrongDev($tel, $devid) {
+        $devid = "testdev";
+        $rs = TestRunner::go($this->url, compact('tel', 'devid'));
     }
 
     /**
      * 未注册的手机号
      * @dataProvider appProvider
      * @expectedException \App\Common\Exception\AppException
-     * @expectedExceptionCode 1001
+     * @expectedExceptionCode 2003
      */
     public function testStatusNotSignTel($tel, $devid) {
         $tel = "18911106295";

@@ -35,8 +35,8 @@ class Device extends Api
      * @desc 查看某设备的在线状态
      * @return string content 在线状态
      * @return string data 详细在线信息
-     * @exception 1001 设备编号有误
-     * @exception 1002 锁编号错误
+     * @exception 1003 设备编号有误
+     * @exception 1004 锁编号错误
      */
     public function Status()
     {
@@ -45,13 +45,13 @@ class Device extends Api
 
         //锁编号检查
         if (!in_array($lockid, $this->lockids)) {
-            throw new AppException("锁编号错误", 1002);
+            throw new AppException("锁编号错误", 1004);
         }
         $deviceModel = new DeviceModel($this->token);
         $ret = $deviceModel->status($devid, $lockid);
         // 设备错误会返回信息不匹配错误
         if ($ret["code"] == 406) {
-            throw new AppException("设备编号有误", 1001);
+            throw new AppException("设备编号有误", 1003);
         } elseif ($ret["code"] == 403) {
             throw new ApiException($ret["msg"], $ret["code"]);
         }
