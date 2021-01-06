@@ -163,14 +163,12 @@ class PhpUnderControl_AppApiMemberAdd_Test extends \PHPUnit_Framework_TestCase
      * 不正确的设备号
      * @dataProvider appProvider
      * @expectedException \App\Common\Exception\AppException
-     * @expectedExceptionCode 1002
+     * @expectedExceptionCode 1003
      */
-    public function testDeleteWrongDev($params) {
-        $tel = $params["tel"];
-        $lockid = $params["lockid"];
-        $devid = "testdev";
+    public function testAddWrongDev($params) {
+        $params["devid"] = "testdev";
         try {
-            $rs = TestRunner::go($this->url, compact('tel', 'devid', 'lockid'));
+            $rs = TestRunner::go($this->url, $params);
             var_dump($rs);
         } catch (DeviceException $ex) {
             $this->fail($ex->getMessage());

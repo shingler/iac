@@ -34,7 +34,7 @@ class PhpUnderControl_AppApiMemberStatus_Test extends \PHPUnit_Framework_TestCas
 
     public function appProvider() {
         return [
-            ["18611106295", 215571]
+            ["18611102795", 215571]
         ];
     }
 
@@ -84,6 +84,7 @@ class PhpUnderControl_AppApiMemberStatus_Test extends \PHPUnit_Framework_TestCas
     public function testStatus($tel, $devid) {
         sleep(2);
         $rs = TestRunner::go($this->url, compact('tel', 'devid'));
+        var_dump($rs);
         $this->assertArrayHasKey("data", $rs);
         $this->assertNotEmpty($rs["data"]);
         $this->assertArrayHasKey("member", $rs["data"]);

@@ -36,7 +36,7 @@ class PhpUnderControl_AppApiMemberDelete_Test extends \PHPUnit_Framework_TestCas
 
     public function appProvider() {
         return [
-            ["18611104163", 215571, "01"]
+            ["18611106391", 215571, "01"]
         ];
     }
 
@@ -67,7 +67,7 @@ class PhpUnderControl_AppApiMemberDelete_Test extends \PHPUnit_Framework_TestCas
      * 未注册的手机号
      * @dataProvider appProvider
      * @expectedException \App\Common\Exception\AppException
-     * @expectedExceptionCode 1003
+     * @expectedExceptionCode 2003
      */
     public function testDeleteNotSignTel($tel, $devid, $lockid) {
         $tel = "18911106295";
@@ -127,7 +127,7 @@ class PhpUnderControl_AppApiMemberDelete_Test extends \PHPUnit_Framework_TestCas
         try {
             $rs = TestRunner::go("s=Member.Status", compact('tel', 'devid'));
         } catch (AppException $ex) {
-            if ($ex->getCode() != 1001) {
+            if ($ex->getCode() != 2003) {
                 $this->fail($ex->getMessage());
             }
         } catch (\Exception $ex) {

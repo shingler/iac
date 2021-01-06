@@ -37,11 +37,11 @@ class PhpUnderControl_AppApiMemberUpdate_Test extends \PHPUnit_Framework_TestCas
     }
 
     public function appProvider() {
-        $tel = "18611106522";
+        $tel = "18611101539";
         $devid = 215571;
         $lockid = "01";
         $start = date("Y-m-d H:i:s");
-        $end = date("Y-m-d 23:59:59");
+        $end = date("Y-m-d 23:59:59", strtotime("+2 day"));
 
         $params = array(
             'tel' => $tel,
@@ -154,21 +154,21 @@ class PhpUnderControl_AppApiMemberUpdate_Test extends \PHPUnit_Framework_TestCas
         $rs_before = TestRunner::go("s=Member.Status", ["devid" => $params["devid"], "tel" => $params["tel"]]);
         $before_datetime = sprintf("%s %s", $rs_before["data"]["binding"]["enddate"], $rs_before["data"]["binding"]["endtime"]);
         $before_ts = strtotime($before_datetime);
-        echo sprintf("修改前的时间字符串为%s，时间戳为%s", $before_datetime, $before_ts);
+        echo sprintf("修改前的时间字符串为%s，时间戳为%s".PHP_EOL, $before_datetime, $before_ts);
 
         sleep(2);
         try{ 
             $rs = TestRunner::go($this->url, $params);
-            var_dump($rs);
+            // var_dump($rs);
             $this->assertArrayHasKey("data", $rs);
             $this->assertEquals(1, $rs["data"]["code"]);
 
             //获取修改后的时效
             sleep(2);
             $rs_after = TestRunner::go("s=Member.Status", ["devid" => $params["devid"], "tel" => $params["tel"]]);
-            $after_datetime = sprintf("%s %s", $rs_before["data"]["binding"]["enddate"], $rs_before["data"]["binding"]["endtime"]);
+            $after_datetime = sprintf("%s %s", $rs_after["data"]["binding"]["enddate"], $rs_after["data"]["binding"]["endtime"]);
             $after_ts = strtotime($after_datetime);
-            echo sprintf("修改后的时间字符串为%s，时间戳为%s", $after_datetime, $after_ts);
+            echo sprintf("修改后的时间字符串为%s，时间戳为%s".PHP_EOL, $after_datetime, $after_ts);
 
             $this->assertGreaterThanOrEqual($before_ts, $after_ts);
         } catch (DeviceException $ex) {
