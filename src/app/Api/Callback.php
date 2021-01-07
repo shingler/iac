@@ -39,6 +39,7 @@ class Callback extends Api
             "uid" => $callback_data["uid"],
             "result" => "1"
         ];
+        \PhalApi\DI()->callback_logger->debug(json_encode($return, JSON_UNESCAPED_UNICODE));
         echo json_encode($return, JSON_UNESCAPED_UNICODE);
         exit;
     }
