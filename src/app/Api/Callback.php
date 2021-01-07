@@ -28,6 +28,8 @@ class Callback extends Api
     {
         $callback_data = $this->callback;
 //        var_dump($callback_data);
+        //{"code":"900","devid":"215571","status":"无开锁权限","reqstatus":"0","mid":"135010","flag":"0","uid":"18611102795","imageurl":"http:\/\/huweibing-1253704117.cos.ap-guangzhou.myqcloud.com\/215571\/2021-01-07\/38a4f16e-cf34-4378-b955-6b7da647da0e.jpg","addtime":"2021-01-07 12:11:49"}
+        //{"code":"900","devid":"215571","status":"人脸识别成功","reqstatus":"1","mid":"135010","flag":"0","uid":"18611102795","imageurl":"http:\/\/huweibing-1253704117.cos.ap-guangzhou.myqcloud.com\/215571\/2021-01-07\/377f6e4c-bbcb-44c9-a4d3-b91835594037.jpg","temperature":"0.0","addtime":"2021-01-07 12:19:53"}
         \PhalApi\DI()->callback_logger->info(json_encode($callback_data, JSON_UNESCAPED_UNICODE));
 
         // 按api要求，返回指定格式
@@ -37,7 +39,7 @@ class Callback extends Api
             "devid" => $callback_data["devid"],
             "lockid" => "01",
             "uid" => $callback_data["uid"],
-            "result" => "1"
+            "result" => $callback_data["reqstatus"]
         ];
         \PhalApi\DI()->callback_logger->debug(json_encode($return, JSON_UNESCAPED_UNICODE));
         echo json_encode($return, JSON_UNESCAPED_UNICODE);
