@@ -2,7 +2,7 @@
 namespace App\Common\Exception;
 use PhalApi\Exception;
 
-class ApiException extends \Exception
+class ApiException extends Exception
 {
 
 }
