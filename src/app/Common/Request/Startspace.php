@@ -1,0 +1,28 @@
+<?php
+namespace App\Common\Request;
+
+use App\Common\Exception\ApiException;
+
+class Startspace
+{
+    /**
+     * 传递回调信息
+     * @param string $data
+     * @throws \Exception
+     * @return bool
+     * {"code":1,"msg":"成功"}
+     */
+    public static function door_is_open($data) {
+        $url = Urls::startspace_callback();
+        $params = [
+            "service" => "App.Callback.Unlock",
+            "callback" => $data,
+        ];
+        $ret = \App\curl_post($url, $params);
+        if ($ret["code"] != 1) {
+            \PhalApi\DI()->logger->error($ret["msg"], $params);
+            return false;
+        }
+        return true;
+    }
+}

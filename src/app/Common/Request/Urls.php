@@ -18,4 +18,8 @@ class Urls
     public static function status() {
         return "https://api.parkline.cc/api/statuscgi";
     }
+
+    public static function startspace_callback() {
+        return "http://www.startspace.cn/testapi/public/";
+    }
 }

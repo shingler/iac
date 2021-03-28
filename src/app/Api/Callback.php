@@ -3,6 +3,8 @@ namespace App\Api;
 use PhalApi\Api;
 use PhalApi\Logger;
 use PhalApi\Logger\FileLogger;
+use App\Common\Request;
+use App\Common\Request\Startspace;
 
 /**
  * 智能门禁开锁回调
@@ -44,8 +46,11 @@ class Callback extends Api
         if ($callback_data["code"] == "900") {
             $callback_data["result"] = $callback_data["reqstatus"];
         }
-        \PhalApi\DI()->callback_logger->debug(json_encode($return, JSON_UNESCAPED_UNICODE));
-        echo json_encode($return, JSON_UNESCAPED_UNICODE);
+        $return_data = json_encode($return, JSON_UNESCAPED_UNICODE);
+        \PhalApi\DI()->callback_logger->debug($return_data);
+        // 发送日志信息到startspace
+        Startspace::door_is_open($return_data);
+        echo $return_data;
         exit;
     }
 }
