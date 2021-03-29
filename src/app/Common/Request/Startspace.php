@@ -14,15 +14,13 @@ class Startspace
      */
     public static function door_is_open($data) {
         $url = Urls::startspace_callback();
-        \PhalApi\DI()->callback_logger->debug($url);
         $params = [
             "service" => "App.Callback.Unlock",
             "callback" => $data,
         ];
-        \PhalApi\DI()->callback_logger->debug($params);
         $ret = \App\curl_post($url, $params);
-        \PhalApi\DI()->callback_logger->debug($ret);
-        if ($ret["code"] != 1) {
+        \PhalApi\DI()->callback_logger->debug(json_encode($ret, JSON_UNESCAPED_UNICODE));
+        if ($ret["ret"] != "200") {
             \PhalApi\DI()->logger->error($ret["msg"], $params);
             return false;
         }
