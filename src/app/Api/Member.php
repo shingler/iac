@@ -150,6 +150,8 @@ class Member extends Api
         if (!isset($ret["code"]) || $ret["code"] != 1) {
             throw new ApiException(sprintf("绑定成员失败，%s", $ret["msg"]), 3000 + $ret["typeid"]);
         }
+        //修改绑定（实际情况是修改了才会立刻生效）
+        $deviceModel->updateBind($tel, $devid, $lockid, $start, $end);
 
         //注册人脸
         $ret = $memberModel->addFace($tel, $filedata, $devid);
@@ -177,7 +179,7 @@ class Member extends Api
 //        }
 
         //还原离线人脸库（应对设备和后台数据不同步问题）
-        $deviceModel->restore($devid);
+//        $deviceModel->restore($devid);
 
         $msg = "成员新增成功";
         if (strlen($device_msg) > 0) {
@@ -258,7 +260,7 @@ class Member extends Api
         $res = $memberModel->delete($tel);
 
         //还原离线人脸库（应对设备和后台数据不同步问题）
-        $deviceModel->restore($devid);
+//        $deviceModel->restore($devid);
         
         return ["content" => "删除成功"];
     }
@@ -343,7 +345,7 @@ class Member extends Api
         }
 
         //还原离线人脸库（应对设备和后台数据不同步问题）
-        $deviceModel->restore($devid);
+//        $deviceModel->restore($devid);
 
         //合并消息
         $return_msg = $ret["msg"];
