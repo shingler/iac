@@ -44,7 +44,7 @@ class Callback extends Api
             "result" => "1"
         ];
         if ($callback_data["code"] == "900") {
-            $callback_data["result"] = $callback_data["reqstatus"];
+            $return["result"] = $callback_data["reqstatus"];
         }
         $return_data = json_encode($return, JSON_UNESCAPED_UNICODE);
         \PhalApi\DI()->callback_logger->debug($return_data);
