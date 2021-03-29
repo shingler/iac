@@ -176,6 +176,9 @@ class Member extends Api
             return ["content"=>"注册完成，数据同步有延迟，请稍候"];
         }
 
+        //还原离线人脸库（应对设备和后台数据不同步问题）
+        $deviceModel->restore($devid);
+
         $msg = "成员新增成功";
         if (strlen($device_msg) > 0) {
             $msg = sprintf("%s (%s)",$msg, $device_msg);
@@ -253,6 +256,9 @@ class Member extends Api
         }
         //删除会员
         $res = $memberModel->delete($tel);
+
+        //还原离线人脸库（应对设备和后台数据不同步问题）
+        $deviceModel->restore($devid);
         
         return ["content" => "删除成功"];
     }
@@ -335,6 +341,9 @@ class Member extends Api
         if (!isset($res["code"]) || $res["code"] != "0") {
             throw new ApiException(sprintf("注册离线人脸库失败，%s", $res["msg"]), 3000 + $res["typeid"]);
         }
+
+        //还原离线人脸库（应对设备和后台数据不同步问题）
+        $deviceModel->restore($devid);
 
         //合并消息
         $return_msg = $ret["msg"];
