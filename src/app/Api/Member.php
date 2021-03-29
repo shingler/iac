@@ -171,10 +171,10 @@ class Member extends Api
         }
 
         //查找信息以检查
-        $ret = $memberModel->find($tel);
-        if (!$ret) {
-            return ["content"=>"注册完成，数据同步有延迟，请稍候"];
-        }
+//        $ret = $memberModel->find($tel);
+//        if (!$ret) {
+//            return ["content"=>"注册完成，数据同步有延迟，请稍候"];
+//        }
 
         //还原离线人脸库（应对设备和后台数据不同步问题）
         $deviceModel->restore($devid);

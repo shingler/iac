@@ -49,7 +49,7 @@ class Callback extends Api
         $return_data = json_encode($return, JSON_UNESCAPED_UNICODE);
         \PhalApi\DI()->callback_logger->debug($return_data);
         // 发送日志信息到startspace
-        Startspace::door_is_open($return_data);
+        Startspace::door_is_open(json_encode($callback_data, JSON_UNESCAPED_UNICODE));
         echo $return_data;
         exit;
     }
