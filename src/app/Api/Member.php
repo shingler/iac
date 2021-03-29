@@ -150,14 +150,15 @@ class Member extends Api
         if (!isset($ret["code"]) || $ret["code"] != 1) {
             throw new ApiException(sprintf("绑定成员失败，%s", $ret["msg"]), 3000 + $ret["typeid"]);
         }
-        //修改绑定（实际情况是修改了才会立刻生效）
-        $deviceModel->updateBind($tel, $devid, $lockid, $start, $end);
 
         //注册人脸
         $ret = $memberModel->addFace($tel, $filedata, $devid);
         if (!isset($ret["code"]) || $ret["code"] != 1) {
             throw new ApiException(sprintf("注册人脸失败，%s", $ret["msg"]), 3000 + $ret["typeid"]);
         }
+
+        //修改绑定（实际情况是修改了才会立刻生效）
+        $deviceModel->updateBind($tel, $devid, $lockid, $start, $end);
 
         $device_msg = "";
         //下发离线开锁权限
