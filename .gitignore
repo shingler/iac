@@ -16,7 +16,7 @@ node_modules
 package-lock.json
 composer.phar
 
+vendor/*
 !vendor/composer
 !vendor/phalapi
 !vendor/autoload.php
-vendor/*
