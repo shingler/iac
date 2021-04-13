@@ -157,6 +157,9 @@ class Member extends Api
             throw new ApiException(sprintf("注册人脸失败，%s", $ret["msg"]), 3000 + $ret["typeid"]);
         }
 
+        //修改绑定（实际情况是修改了才会立刻生效）
+        $deviceModel->updateBind($tel, $devid, $lockid, $start, $end);
+
         $device_msg = "";
         //下发离线开锁权限
         $ret = $deviceModel->upgradeUnlock($tel, $devid, false);
@@ -171,10 +174,13 @@ class Member extends Api
         }
 
         //查找信息以检查
-        $ret = $memberModel->find($tel);
-        if (!$ret) {
-            return ["content"=>"注册完成，数据同步有延迟，请稍候"];
-        }
+//        $ret = $memberModel->find($tel);
+//        if (!$ret) {
+//            return ["content"=>"注册完成，数据同步有延迟，请稍候"];
+//        }
+
+        //还原离线人脸库（应对设备和后台数据不同步问题）
+//        $deviceModel->restore($devid);
 
         $msg = "成员新增成功";
         if (strlen($device_msg) > 0) {
@@ -253,6 +259,9 @@ class Member extends Api
         }
         //删除会员
         $res = $memberModel->delete($tel);
+
+        //还原离线人脸库（应对设备和后台数据不同步问题）
+//        $deviceModel->restore($devid);
         
         return ["content" => "删除成功"];
     }
@@ -335,6 +344,9 @@ class Member extends Api
         if (!isset($res["code"]) || $res["code"] != "0") {
             throw new ApiException(sprintf("注册离线人脸库失败，%s", $res["msg"]), 3000 + $res["typeid"]);
         }
+
+        //还原离线人脸库（应对设备和后台数据不同步问题）
+//        $deviceModel->restore($devid);
 
         //合并消息
         $return_msg = $ret["msg"];

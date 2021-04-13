@@ -15,6 +15,7 @@ class Device
         "update_bind" => 203,
         "delete_bind" => 204,
         "unlock_offline" => 400,
+        "restore" => 402
     ];
 
     public function __construct($token) {
@@ -201,6 +202,25 @@ class Device
         $params = [
             "devid" => $devid,
             "lockid" => $lockid,
+            "token" => $this->token
+        ];
+        $ret = \App\curl_post($url, $params);
+        return $ret;
+    }
+
+    /**
+     * 还原设备离线人脸库
+     * @param $devid
+     * @throws \Exception
+     * @return bool|string
+     * {"devid":"215571","status":"在线","lastopenlocktime":"未知","lastduandiantime":"未知","lastcloselocktime":"未知","lockstatus":"未知","doorstatus":"未知","qudianstatus":"未知","lastopendoortime":"未知","lastclosedoortime":"未知","lastqudiantime":"未知"}
+     * {"code":406,"msg":"信息不匹配"}
+     */
+    public function restore($devid) {
+        $url = Urls::member();
+        $params = [
+            "devid" => $devid,
+            "typeid" => self::$_TYPE_ID["restore"],
             "token" => $this->token
         ];
         $ret = \App\curl_post($url, $params);
